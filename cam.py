@@ -1,7 +1,8 @@
-from torchvision.models import resnet101, ResNet101_Weights
+from torchvision.models import resnet18, ResNet18_Weights
+import torch
 import torch.nn as nn
 
-resnet = resnet101(weights=ResNet101_Weights.DEFAULT)
+resnet = resnet18(weights=ResNet18_Weights.DEFAULT)
 
 # print(resnet)
 
@@ -19,10 +20,12 @@ class resnet_cam(nn.Module):
     self.layer4 = resnet.layer4
 
     # self.fc = resnet.fc # ImageNet pretrained has 1000 classes
-    self.fc = nn.Linear(in_features=2048, out_features=21, bias=True)
-    self.upsampling = nn.UpsamplingBilinear2d(scale_factor=2)
+    self.fc = nn.Linear(in_features=512, out_features=21, bias=True)
+    self.upsampling = nn.UpsamplingBilinear2d(size=(600,600))
     
   def forward(self, x): # 8 times stride 2
+    # ori_x, ori_y = x.shape[-2], x.shape[-1]
+
     x = self.conv1(x)
     x = self.bn1(x)
     x = self.relu(x)
@@ -30,25 +33,21 @@ class resnet_cam(nn.Module):
     x = self.layer1(x)
     x = self.layer2(x)
     x = self.layer3(x)
-    x = self.layer3(x)
     x = self.layer4(x)
+
+    # print('x.shape : ', x.shape)
+
+    out = torch.zeros([1,21,19,19])
     
     # pass fc for every spatial position
-    for i in range(x.shape[0]):
-      for j in range(x.shape[1]):
-        x[:,:,i,j] = self.fc(x[:,:,i,j]) # only 1 batch
-
-    x = upsampling(x)
-    x = upsampling(x)
-    x = upsampling(x)
-    x = upsampling(x)
-    x = upsampling(x)
-    x = upsampling(x)
-    x = upsampling(x)
-    x = upsampling(x)
+    for i in range(x.shape[-2]):
+      for j in range(x.shape[-1]):
+        # print(x.shape)
+        # print(x[:,:,i,j].shape)
+        out[:,:,i,j] = self.fc(x[:,:,i,j]) # only 1 batch
 
     # need upsampling to the input size : bilinear 8 times
-    out = x
+    out = self.upsampling(out)
     return out
 
 # test_model = resnet_cam()

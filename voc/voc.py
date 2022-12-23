@@ -96,31 +96,31 @@ val_ds = myVOCDetection(path2data, year='2012', image_set='val')
 
 #######################################################################
 #######################################################################
-# 샘플 이미지 확인
-img, target, label = train_ds[3]
-colors = np.random.randint(0, 255, size=(80,3), dtype='uint8') # 바운딩 박스 색상
+# # 샘플 이미지 확인
+# img, target, label = train_ds[3]
+# colors = np.random.randint(0, 255, size=(80,3), dtype='uint8') # 바운딩 박스 색상
 
-# 시각화 함수
-def show(img, targets, labels, classes=classes):
-    img = to_pil_image(img)
-    draw = ImageDraw.Draw(img)
-    targets = np.array(targets)
-    W, H = img.size
+# # 시각화 함수
+# def show(img, targets, labels, classes=classes):
+#     img = to_pil_image(img)
+#     draw = ImageDraw.Draw(img)
+#     targets = np.array(targets)
+#     W, H = img.size
 
-    for tg,label in zip(targets,labels):
-        id_ = int(label) # class
-        bbox = tg[:4]    # [x1, y1, x2, y2]
+#     for tg,label in zip(targets,labels):
+#         id_ = int(label) # class
+#         bbox = tg[:4]    # [x1, y1, x2, y2]
 
-        color = [int(c) for c in colors[id_]]
-        name = classes[id_]
+#         color = [int(c) for c in colors[id_]]
+#         name = classes[id_]
 
-        draw.rectangle(((bbox[0], bbox[1]), (bbox[2], bbox[3])), outline=tuple(color), width=3)
-        draw.text((bbox[0], bbox[1]), name, fill=(255,255,255,0))
-    plt.imshow(np.array(img))
-    plt.savefig('testimg01.png')
+#         draw.rectangle(((bbox[0], bbox[1]), (bbox[2], bbox[3])), outline=tuple(color), width=3)
+#         draw.text((bbox[0], bbox[1]), name, fill=(255,255,255,0))
+#     plt.imshow(np.array(img))
+#     plt.savefig('testimg01.png')
 
-plt.figure(figsize=(10,10))
-show(img, target, label)
+# plt.figure(figsize=(10,10))
+# show(img, target, label)
 
 #######################################################################
 #######################################################################
