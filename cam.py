@@ -7,48 +7,62 @@ resnet = resnet18(weights=ResNet18_Weights.DEFAULT)
 # print(resnet)
 
 class resnet_cam(nn.Module):
-  def __init__(self):
-    super().__init__()
-    self.conv1 = resnet.conv1
-    self.bn1 = resnet.bn1
-    self.relu = resnet.relu
-    self.maxpool = resnet.maxpool
-    self.layer1 = resnet.layer1
-    self.layer2 = resnet.layer2
-    self.layer3 = resnet.layer3
-    self.layer3 = resnet.layer3
-    self.layer4 = resnet.layer4
+    def __init__(self):
+        super().__init__()
+        self.conv1 = resnet.conv1
+        self.bn1 = resnet.bn1
+        self.relu = resnet.relu
+        self.maxpool = resnet.maxpool
+        self.layer1 = resnet.layer1
+        self.layer2 = resnet.layer2
+        self.layer3 = resnet.layer3
+        self.layer3 = resnet.layer3
+        self.layer4 = resnet.layer4
 
-    # self.fc = resnet.fc # ImageNet pretrained has 1000 classes
-    self.fc = nn.Linear(in_features=512, out_features=21, bias=True)
-    self.upsampling = nn.UpsamplingBilinear2d(size=(600,600))
-    
-  def forward(self, x): # 8 times stride 2
-    # ori_x, ori_y = x.shape[-2], x.shape[-1]
+        self.avgpool = resnet.avgpool
+        # self.fc = resnet.fc # ImageNet pretrained has 1000 classes
+        self.fc = nn.Linear(in_features=512, out_features=21, bias=True)
+        self.upsampling = nn.UpsamplingBilinear2d(size=(600,600))
 
-    x = self.conv1(x)
-    x = self.bn1(x)
-    x = self.relu(x)
-    x = self.maxpool(x)
-    x = self.layer1(x)
-    x = self.layer2(x)
-    x = self.layer3(x)
-    x = self.layer4(x)
+        self.cam_flag = False
 
-    # print('x.shape : ', x.shape)
 
-    out = torch.zeros([1,21,19,19])
-    
-    # pass fc for every spatial position
-    for i in range(x.shape[-2]):
-      for j in range(x.shape[-1]):
-        # print(x.shape)
-        # print(x[:,:,i,j].shape)
-        out[:,:,i,j] = self.fc(x[:,:,i,j]) # only 1 batch
+    def forward(self, x):
+        if self.cam_flag = True:
+            x = self.conv1(x)
+            x = self.bn1(x)
+            x = self.relu(x)
+            x = self.maxpool(x)
+            x = self.layer1(x)
+            x = self.layer2(x)
+            x = self.layer3(x)
+            x = self.layer4(x)
 
-    # need upsampling to the input size : bilinear 8 times
-    out = self.upsampling(out)
-    return out
+            out = torch.zeros([1,21,19,19])
+            
+            # pass fc for every spatial position
+            for i in range(x.shape[-2]):
+                for j in range(x.shape[-1]):
+                    out[:,:,i,j] = self.fc(x[:,:,i,j]) # only 1 batch
+            out = self.upsampling(out)
+        else:
+            x = self.conv1(x)
+            x = self.bn1(x)
+            x = self.relu(x)
+            x = self.maxpool(x)
+            x = self.layer1(x)
+            x = self.layer2(x)
+            x = self.layer3(x)
+            x = self.layer4(x)
+            x = self.avgpool(x)
+            out = self.fc(x)
+        return out
+
+    def switch2forward():
+        self.cam_flag = False
+
+    def switch2cam():
+        self.cam_flag = True
 
 # test_model = resnet_cam()
 # for param in test_model.parameters():
