@@ -41,7 +41,7 @@ def train(model, optimizer, criterion, train_dataloader, validation_dataloader,
 
             total_trainval_loss /= len(train_dataloader)
             print('++++++++++++++++++++++++++++++++++++')
-            print("validation epoch %d, loss : %f "%(epoch + 1, total_loss))
+            print("validation epoch %d, loss : %f "%(epoch + 1, total_trainval_loss))
             print('++++++++++++++++++++++++++++++++++++')
             loss_history['val'].append(total_trainval_loss)
 
