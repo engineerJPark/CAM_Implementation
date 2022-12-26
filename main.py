@@ -29,7 +29,7 @@ if __name__ == '__main__':
     # weight_decay = 5e-4
     optimizer = optim.Adam(model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss().to(device)
-    train(model, optimizer, criterion, train_dl, trainval_dl, scheduler=None, epochs=50, device=device)
+    train(model, optimizer, criterion, train_dl, trainval_dl, scheduler=None, epochs=100, device=device) # edit to 100 after the test
 
     model.switch2cam()
     for iter, (val_img, _) in enumerate(val_dl): # _ was target bb & labels, val_img, _ = next(iter(val_dl))

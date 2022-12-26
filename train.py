@@ -26,13 +26,13 @@ def train(model, optimizer, criterion, train_dataloader, validation_dataloader,
         total_loss /= len(train_dataloader)
 
         print('====================================')
-        print("epoch %d, loss : %f "%(epoch + 1, total_loss))
-        loss_history['train'].append(total_loss.item())
+        print("train epoch %d, loss : %f "%(epoch + 1, total_loss))
+        loss_history['train'].append(total_loss)
 
         if scheduler is not None:
             scheduler.step()
         
-        if (epoch + 1) % 5 == 0:
+        if (epoch + 1) % 10 == 0:
             total_trainval_loss = 0
             for iter, (trainval_img, trainval_labels) in enumerate(validation_dataloader):
                 score = model(trainval_img.to(device))
@@ -40,7 +40,10 @@ def train(model, optimizer, criterion, train_dataloader, validation_dataloader,
                 total_trainval_loss += float(loss)
 
             total_trainval_loss /= len(train_dataloader)
-            loss_history['val'].append(total_loss.item())
+            print('++++++++++++++++++++++++++++++++++++')
+            print("validation epoch %d, loss : %f "%(epoch + 1, total_loss))
+            print('++++++++++++++++++++++++++++++++++++')
+            loss_history['val'].append(total_trainval_loss)
 
             if last_loss > total_trainval_loss:
                 now = datetime.datetime.now()
@@ -48,9 +51,7 @@ def train(model, optimizer, criterion, train_dataloader, validation_dataloader,
                 torch.save({
                             'epoch': epoch + 1,
                             'model_state_dict': model.state_dict(),
-                            #   'optimizer_state_dict': optimizer.state_dict(),
-                            #   'scheduler_state_dict': scheduler.state_dict(),
-                            #   'loss': total_trainval_loss
+                            'loss': total_trainval_loss
                             }, PATH)
                 last_loss = total_trainval_loss
 
