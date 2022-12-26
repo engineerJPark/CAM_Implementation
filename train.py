@@ -13,11 +13,11 @@ def train(model, optimizer, criterion, train_dataloader, validation_dataloader,
     for epoch in range(epochs):
         
         total_loss = 0
-        for iter, (train_img, _, train_labels) in enumerate(train_dataloader):
-            score = model(train_img.to(device)) # might be [21]
-            
+        for iter, (train_img, train_labels) in enumerate(train_dataloader):
+            score = model(train_img.to(device)) # might be [20]
+
             optimizer.zero_grad()
-            loss = criterion(score, train_labels.to(device))
+            loss = criterion(score, train_labels.reshape(-1).to(device))
             loss.backward()
             optimizer.step()
             total_loss += float(loss)
@@ -31,9 +31,11 @@ def train(model, optimizer, criterion, train_dataloader, validation_dataloader,
         if scheduler is not None:
             scheduler.step()
         
-        if (epoch + 1) % 5 == 0 
+        if (epoch + 1) % 5 == 0:
             total_trainval_loss = 0
-            for iter, (trainval_img, _, trainval_labels) in enumerate(validation_dataloader):
+            for iter, (trainval_img, trainval_labels) in enumerate(validation_dataloader):
+                # print("trainval_img : ", trainval_img.shape)
+                # print("trainval_labels : ", trainval_labels.shape)
                 score = model(trainval_img.to(device))
                 loss = criterion(score, train_labels.to(device))
                 total_trainval_loss += float(loss)

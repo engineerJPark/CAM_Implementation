@@ -27,23 +27,22 @@ if __name__ == '__main__':
     
     # lr = 1e-3
     # weight_decay = 5e-4
-    optimizer = optim.Adam(model.parameters(), lr=lr, eight_decay=weight_decay)
+    optimizer = optim.Adam(model.parameters())
     criterion = nn.CrossEntropyLoss().to(device)
-    train(model, optimizer, criterion, train_dl, trainval_dl, 
-            scheduler=None, epochs=100, device=device)
+    train(model, optimizer, criterion, train_dl, trainval_dl, scheduler=None, epochs=10, device=device)
 
     model.switch2cam()
-    idx = 0 # for iter, (val_img, _, _) in enumerate(val_dl): # _ was target bb & labels
-    val_img, _, _ = next(iter(val_dl)) 
-    out = model(val_img.to(device))
+    for iter, (val_img, _) in enumerate(val_dl): # _ was target bb & labels, val_img, _ = next(iter(val_dl))
+        out = model(val_img.to(device))
+        val_img_pil = torch.zeros((out.shape[1], out.shape[2], out.shape[3]))
+        for channel_idx in range(out.shape[1]): # cam img for each class + coloring
+            val_img_pil[channel_idx,:,:] = PIL.Image.fromarray(np.uint8(cm.jet(out[0,channel_idx,:,:].detach().cpu().numpy()) * 255))
 
-    # cam img for each class + coloring
-    # for channel_idx in range(out.shape[0]):
-    val_img_pil = PIL.Image.fromarray(np.uint8(cm.jet(out[0,6,:,:].detach().cpu().numpy() * 1) * 255)) # 6 : car class
+        # superpose on image
+        val_img = val_img[0].detach().cpu().numpy().transpose(1, 2, 0)
 
-    # superpose on image, test on class 0
-    val_img = val_img[0].detach().cpu().numpy().transpose(1, 2, 0)
-    plt.imshow(val_img, alpha = 0.5)
-    plt.imshow(val_img_pil, alpha = 0.3)
-    plt.show()
-    plt.savefig('CAM_Result01.png')
+        for channel_idx in range(out.shape[1]): 
+            plt.imshow(val_img, alpha = 0.5)
+            plt.imshow(val_img_pil[channel_idx], alpha = 0.3)
+            plt.show()
+            plt.savefig('./result/CAM_Result_%d_%d.png'%(iter+1, channel_idx+1))
