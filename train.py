@@ -34,10 +34,8 @@ def train(model, optimizer, criterion, train_dataloader, validation_dataloader,
         if (epoch + 1) % 5 == 0:
             total_trainval_loss = 0
             for iter, (trainval_img, trainval_labels) in enumerate(validation_dataloader):
-                # print("trainval_img : ", trainval_img.shape)
-                # print("trainval_labels : ", trainval_labels.shape)
                 score = model(trainval_img.to(device))
-                loss = criterion(score, train_labels.to(device))
+                loss = criterion(score, train_labels.reshape(-1).to(device))
                 total_trainval_loss += float(loss)
 
             total_trainval_loss /= len(train_dataloader)

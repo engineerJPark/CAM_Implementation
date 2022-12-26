@@ -25,11 +25,11 @@ if __name__ == '__main__':
     model.fc.weight.requires_grad = True
     model.fc.bias.requires_grad = True
     
-    # lr = 1e-3
+    lr = 1e-3
     # weight_decay = 5e-4
-    optimizer = optim.Adam(model.parameters())
+    optimizer = optim.Adam(model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss().to(device)
-    train(model, optimizer, criterion, train_dl, trainval_dl, scheduler=None, epochs=10, device=device)
+    train(model, optimizer, criterion, train_dl, trainval_dl, scheduler=None, epochs=50, device=device)
 
     model.switch2cam()
     for iter, (val_img, _) in enumerate(val_dl): # _ was target bb & labels, val_img, _ = next(iter(val_dl))
