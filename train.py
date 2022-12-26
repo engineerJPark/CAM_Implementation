@@ -4,6 +4,7 @@ import datetime
 def train(model, optimizer, criterion, train_dataloader, validation_dataloader, 
             scheduler=None, epochs=100, device='cpu'):
     loss_history = []
+    loss_history = {'train':[], 'val':[]}
     last_loss = 10 ** 9
 
     model.switch2forward()
@@ -26,7 +27,7 @@ def train(model, optimizer, criterion, train_dataloader, validation_dataloader,
 
         print('====================================')
         print("epoch %d, loss : %f "%(epoch + 1, total_loss))
-        loss_history.append(loss.item())
+        loss_history['train'].append(total_loss.item())
 
         if scheduler is not None:
             scheduler.step()
@@ -39,6 +40,7 @@ def train(model, optimizer, criterion, train_dataloader, validation_dataloader,
                 total_trainval_loss += float(loss)
 
             total_trainval_loss /= len(train_dataloader)
+            loss_history['val'].append(total_loss.item())
 
             if last_loss > total_trainval_loss:
                 now = datetime.datetime.now()
@@ -53,3 +55,4 @@ def train(model, optimizer, criterion, train_dataloader, validation_dataloader,
                 last_loss = total_trainval_loss
 
     print("Training End!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    return loss_history
