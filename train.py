@@ -27,14 +27,15 @@ def train(model, optimizer, criterion, train_dataloader, validation_dataloader,
                 scheduler.step()
 
         total_loss /= len(train_dataloader)
-
+        loss_history['train'].append(total_loss)
         print('====================================')
         print("train epoch %d, loss : %f "%(epoch + 1, total_loss))
-        loss_history['train'].append(total_loss)
         
         # get validation loss
         total_trainval_loss = validate(model, criterion, validation_dataloader, device=device)
         loss_history['val'].append(total_trainval_loss)
+        print('++++++++++++++++++++++++++++++++++++')
+        print("validation epoch %d, loss : %f "%(epoch + 1, total_trainval_loss))
 
         if (epoch + 1) % val_chk_freq == 0: # if loss_history['val'][-2] > loss_history['val'][-1]:
             if last_loss > total_trainval_loss:
@@ -58,10 +59,8 @@ def validate(model, criterion, validation_dataloader, device='cpu'):
         score = model(trainval_img.to(device))
         score = torch.log(score)
         
-        loss = criterion(score, train_labels.reshape(-1).to(device))
+        loss = criterion(score, trainval_labels.reshape(-1).to(device))
         total_trainval_loss += float(loss)
 
-    total_trainval_loss /= len(train_dataloader)
-    print('++++++++++++++++++++++++++++++++++++')
-    print("validation epoch %d, loss : %f "%(epoch + 1, total_trainval_loss))
+    total_trainval_loss /= len(validation_dataloader)
     return total_trainval_loss

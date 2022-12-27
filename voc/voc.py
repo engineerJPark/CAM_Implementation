@@ -143,6 +143,6 @@ trainval_ds.transforms = train_transforms
 val_ds.transforms = val_transforms
 
 # dataloader definition
-train_dl = DataLoader(train_ds, batch_size=1, shuffle=False)
-trainval_dl = DataLoader(trainval_ds, batch_size=1, shuffle=False)
+train_dl = DataLoader(train_ds, batch_size=1, shuffle=True)
+trainval_dl = DataLoader(trainval_ds, batch_size=1, shuffle=True)
 val_dl = DataLoader(val_ds, batch_size=1, shuffle=False)

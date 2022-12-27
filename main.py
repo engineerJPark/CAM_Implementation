@@ -17,7 +17,7 @@ if __name__ == '__main__':
     else:
         device = torch.device('cpu')
         torch.manual_seed(42)
-    print(torch.__version__, device)
+    print("running is done on : ", device)
 
     model = resnet_cam().to(device)
 
@@ -32,14 +32,13 @@ if __name__ == '__main__':
     optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9, weight_decay=weight_decay) # # optimizer = optim.Adam(model.parameters(), lr=lr)
     criterion = nn.NLLLoss().to(device)
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=40000, gamma=0.1)
-    # train(model, optimizer, criterion, train_dl, trainval_dl, val_chk_freq=5, epochs=50, scheduler=None, device=device)
-    train(model, optimizer, criterion, train_dl, trainval_dl, val_chk_freq=1, epochs=1, scheduler=None, device=device)# for test only
+    train(model, optimizer, criterion, train_dl, trainval_dl, val_chk_freq=2, epochs=6, scheduler=None, device=device)
+    # train(model, optimizer, criterion, train_dl, trainval_dl, val_chk_freq=1, epochs=1, scheduler=None, device=device)# for test only
 
     model.switch2cam()
     model.eval()
     for iter, (ori_val_img, val_img, _) in enumerate(val_dl): # _ was target bb & labels, val_img, _ = next(iter(val_dl))
         out = model(val_img.to(device))
-        # val_img_pil = np.zeros((out.shape[1], out.shape[2], out.shape[3]))
         val_img_pil = []
         for channel_idx in range(out.shape[1]): # cam img for each class + coloring
             val_img_pil.append(PIL.Image.fromarray(np.uint8(cm.jet(out[0,channel_idx,:,:].detach().cpu().numpy()) * 255)))

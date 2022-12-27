@@ -32,9 +32,8 @@ class resnet_cam(nn.Module):
             x = self.layer3(x)
             x = self.layer4(x)
             x = F.conv2d(x, self.classifier.weight)
-            print(x.shape)
             x = F.softmax(x, dim=1)
-            out = F.upsample(x, size=(600,600), mode='bilinear')
+            out = F.interpolate(x, size=(600,600), mode='bilinear')
         else:
             x = self.layer0(x)
             x = self.layer1(x)
@@ -54,24 +53,3 @@ class resnet_cam(nn.Module):
     def switch2cam(self):
         self.cam_flag = True
         print("CAM mode")
-
-
-        # self.fc = nn.Sequential(
-        #     nn.Linear(in_features=512, out_features=self.n_classes, bias=True),
-        #     nn.Softmax(dim=-1)
-        # )
-
-            # # 이부분 큰 수정이 필요하다
-            # out = torch.zeros([1, self.n_classes, 19,19])
-            # # pass fc for every spatial position
-            # for i in range(x.shape[-2]):
-            #     for j in range(x.shape[-1]):
-            #         out[:,:,i,j] = self.fc(x[:,:,i,j]) # only 1 batch
-            # out = self.upsampling(out)
-            # out = (out - torch.unsqueeze(torch.min(out, dim=1)[0], 0)) * 255
-            # out = out.to(torch.int)
-
-
-        # self.softmax = nn.Softmax(dim=1)
-
-        # self.upsampling = nn.UpsamplingBilinear2d(size=(600,600))
