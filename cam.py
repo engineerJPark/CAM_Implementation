@@ -22,8 +22,10 @@ class resnet_cam(nn.Module):
         self.layer4 = resnet.layer4
 
         self.avgpool = resnet.avgpool
-        # self.fc = resnet.fc # ImageNet pretrained has 1000 classes
-        self.fc = nn.Linear(in_features=512, out_features=self.n_classes, bias=True)
+        self.fc = nn.Sequential(
+            nn.Linear(in_features=512, out_features=self.n_classes, bias=True),
+            nn.Softmax(dim=-1)
+        )
         self.upsampling = nn.UpsamplingBilinear2d(size=(600,600))
 
         self.cam_flag = False
@@ -67,10 +69,3 @@ class resnet_cam(nn.Module):
     def switch2cam(self):
         self.cam_flag = True
         print("CAM mode")
-
-
-# test_model = resnet_cam()
-# for param in test_model.parameters():
-#     param.requires_grad = False
-# test_model.fc.weight.requires_grad = True
-# test_model.fc.bias.requires_grad = True

@@ -2,8 +2,7 @@ import torch
 import datetime
 
 def train(model, optimizer, criterion, train_dataloader, validation_dataloader, 
-            scheduler=None, epochs=100, device='cpu'):
-    loss_history = []
+            val_chk_freq=10, epochs=100, scheduler=None, device='cpu'):
     loss_history = {'train':[], 'val':[]}
     last_loss = 10 ** 9
 
@@ -14,8 +13,9 @@ def train(model, optimizer, criterion, train_dataloader, validation_dataloader,
     for epoch in range(epochs):
         
         total_loss = 0
-        for iter, (train_img, train_labels) in enumerate(train_dataloader):
+        for iter, (_, train_img, train_labels) in enumerate(train_dataloader):
             score = model(train_img.to(device)) # might be [20]
+            score = torch.log(score)
 
             optimizer.zero_grad()
             loss = criterion(score, train_labels.reshape(-1).to(device))
@@ -23,19 +23,21 @@ def train(model, optimizer, criterion, train_dataloader, validation_dataloader,
             optimizer.step()
             total_loss += float(loss)
 
+            if scheduler is not None:
+                scheduler.step()
+
         total_loss /= len(train_dataloader)
 
         print('====================================')
         print("train epoch %d, loss : %f "%(epoch + 1, total_loss))
         loss_history['train'].append(total_loss)
-
-        if scheduler is not None:
-            scheduler.step()
         
-        if (epoch + 1) % 10 == 0:
+        if (epoch + 1) % val_chk_freq == 0:
             total_trainval_loss = 0
-            for iter, (trainval_img, trainval_labels) in enumerate(validation_dataloader):
+            for iter, (_, trainval_img, trainval_labels) in enumerate(validation_dataloader):
                 score = model(trainval_img.to(device))
+                score = torch.log(score)
+                
                 loss = criterion(score, train_labels.reshape(-1).to(device))
                 total_trainval_loss += float(loss)
 

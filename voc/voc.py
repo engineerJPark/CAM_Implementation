@@ -53,6 +53,7 @@ classes = [
 
 class myVOCDetection(VOCDetection):
     def __getitem__(self, index):
+        self.normalization = transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225], inplace=False)
         img = np.array(Image.open(self.images[index]).convert('RGB'))
         target = self.parse_voc_xml(ET.parse(self.annotations[index]).getroot()) # xml-> dictionary
 
@@ -69,13 +70,14 @@ class myVOCDetection(VOCDetection):
 
         if self.transforms:
             augmentations = self.transforms(image=img, bboxes=targets)
-            img = augmentations['image']
+            ori_img = augmentations['image']
+            img = self.normalization(ori_img)
             targets = augmentations['bboxes']
 
         labels = torch.unique(torch.tensor(labels, dtype=torch.int64), sorted=True)
         labels = F.one_hot(labels, num_classes=20)
-        labels = torch.sum(labels, dim = 0, dtype=torch.float64) # reshape because of batch = 1
-        return img, labels
+        labels = torch.sum(labels, dim = 0) # reshape because of batch = 1
+        return ori_img, img, labels
 
 
     def parse_voc_xml(self, node: ET.Element) -> Dict[str, Any]: # xml-> dictionary
@@ -100,57 +102,40 @@ train_ds = myVOCDetection(path2data, year='2012', image_set='train')
 trainval_ds = myVOCDetection(path2data, year='2012', image_set='trainval')
 val_ds = myVOCDetection(path2data, year='2012', image_set='val')
 
-
-#######################################################################
-#######################################################################
-# # 샘플 이미지 확인
-# img, target, label = train_ds[3]
-# colors = np.random.randint(0, 255, size=(80,3), dtype='uint8') # 바운딩 박스 색상
-
-# # 시각화 함수
-# def show(img, targets, labels, classes=classes):
-#     img = to_pil_image(img)
-#     draw = ImageDraw.Draw(img)
-#     targets = np.array(targets)
-#     W, H = img.size
-
-#     for tg,label in zip(targets,labels):
-#         id_ = int(label) # class
-#         bbox = tg[:4]    # [x1, y1, x2, y2]
-
-#         color = [int(c) for c in colors[id_]]
-#         name = classes[id_]
-
-#         draw.rectangle(((bbox[0], bbox[1]), (bbox[2], bbox[3])), outline=tuple(color), width=3)
-#         draw.text((bbox[0], bbox[1]), name, fill=(255,255,255,0))
-#     plt.imshow(np.array(img))
-#     plt.savefig('testimg01.png')
-
-# plt.figure(figsize=(10,10))
-# show(img, target, label)
-
-#######################################################################
-#######################################################################
 # transforms
 IMAGE_SIZE = 600
 scale = 1.0
 
 # 이미지에 padding을 적용하여 종횡비를 유지시키면서 크기가 600x600 되도록 resize 합니다.
 train_transforms = A.Compose([
-                    A.LongestMaxSize(max_size=int(IMAGE_SIZE * scale)),
-                    A.PadIfNeeded(min_height=int(IMAGE_SIZE*scale), min_width=int(IMAGE_SIZE*scale),border_mode=cv2.BORDER_CONSTANT),
+                    A.Resize(600, 600, interpolation=2),
                     ToTensor()
                     ],
                     bbox_params=A.BboxParams(format='pascal_voc', min_visibility=0.4, label_fields=[])
                     )
 
 val_transforms = A.Compose([
-                    A.LongestMaxSize(max_size=int(IMAGE_SIZE * scale)),
-                    A.PadIfNeeded(min_height=int(IMAGE_SIZE*scale), min_width=int(IMAGE_SIZE*scale),border_mode=cv2.BORDER_CONSTANT),
+                    A.Resize(600, 600, interpolation=2),
                     ToTensor()
                     ],
                     bbox_params=A.BboxParams(format='pascal_voc', min_visibility=0.4, label_fields=[])
                     )
+
+# train_transforms = A.Compose([
+#                     A.LongestMaxSize(max_size=int(IMAGE_SIZE * scale)),
+#                     A.PadIfNeeded(min_height=int(IMAGE_SIZE*scale), min_width=int(IMAGE_SIZE*scale),border_mode=cv2.BORDER_CONSTANT),
+#                     ToTensor()
+#                     ],
+#                     bbox_params=A.BboxParams(format='pascal_voc', min_visibility=0.4, label_fields=[])
+#                     )
+
+# val_transforms = A.Compose([
+#                     A.LongestMaxSize(max_size=int(IMAGE_SIZE * scale)),
+#                     A.PadIfNeeded(min_height=int(IMAGE_SIZE*scale), min_width=int(IMAGE_SIZE*scale),border_mode=cv2.BORDER_CONSTANT),
+#                     ToTensor()
+#                     ],
+#                     bbox_params=A.BboxParams(format='pascal_voc', min_visibility=0.4, label_fields=[])
+#                     )
 
 # apply transforms
 train_ds.transforms = train_transforms
