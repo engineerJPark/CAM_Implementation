@@ -20,14 +20,20 @@ if __name__ == '__main__':
     print(torch.__version__, device)
 
     model = resnet_cam().to(device)
+
+    # # model checkpoint reloading
+    # PATH = './checkpoint/model_12_27_14_20_5'
+    # checkpoint = torch.load(PATH)
+    # model.load_state_dict(checkpoint['model_state_dict'])
     
+    # model training
     lr = 0.001
     weight_decay = 0.0005
     optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9, weight_decay=weight_decay) # # optimizer = optim.Adam(model.parameters(), lr=lr)
     criterion = nn.NLLLoss().to(device)
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=40000, gamma=0.1)
-    train(model, optimizer, criterion, train_dl, trainval_dl, val_chk_freq=5, epochs=50, scheduler=None, device=device)
-    # train(model, optimizer, criterion, train_dl, trainval_dl, val_chk_freq=1, epochs=1, scheduler=None, device=device)# for test only
+    # train(model, optimizer, criterion, train_dl, trainval_dl, val_chk_freq=5, epochs=50, scheduler=None, device=device)
+    train(model, optimizer, criterion, train_dl, trainval_dl, val_chk_freq=1, epochs=1, scheduler=None, device=device)# for test only
 
     model.switch2cam()
     model.eval()
