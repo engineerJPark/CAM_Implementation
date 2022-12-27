@@ -164,3 +164,4 @@ voc/VOCtrainval_11-May-2012.tar
 voc/VOCdevkit
 checkpoint
 result_dep
+unittest.py

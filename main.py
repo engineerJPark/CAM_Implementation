@@ -26,9 +26,11 @@ if __name__ == '__main__':
     optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9, weight_decay=weight_decay) # # optimizer = optim.Adam(model.parameters(), lr=lr)
     criterion = nn.NLLLoss().to(device)
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=40000, gamma=0.1)
-    train(model, optimizer, criterion, train_dl, trainval_dl, val_chk_freq=1, epochs=1, scheduler=None, device=device) # edit to 100 after the test
+    train(model, optimizer, criterion, train_dl, trainval_dl, val_chk_freq=5, epochs=50, scheduler=None, device=device)
+    # train(model, optimizer, criterion, train_dl, trainval_dl, val_chk_freq=1, epochs=1, scheduler=None, device=device)# for test only
 
     model.switch2cam()
+    model.eval()
     for iter, (ori_val_img, val_img, _) in enumerate(val_dl): # _ was target bb & labels, val_img, _ = next(iter(val_dl))
         out = model(val_img.to(device))
         # val_img_pil = np.zeros((out.shape[1], out.shape[2], out.shape[3]))

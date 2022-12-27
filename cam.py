@@ -49,6 +49,9 @@ class resnet_cam(nn.Module):
                 for j in range(x.shape[-1]):
                     out[:,:,i,j] = self.fc(x[:,:,i,j]) # only 1 batch
             out = self.upsampling(out)
+            out = (out - torch.unsqueeze(torch.min(out, dim=1)[0], 0)) * 255
+            out = out.to(torch.int)
+            
         else:
             x = self.conv1(x)
             x = self.bn1(x)
