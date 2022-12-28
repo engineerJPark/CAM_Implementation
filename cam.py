@@ -33,7 +33,7 @@ class resnet_cam(nn.Module):
             x = self.layer4(x)
             x = F.conv2d(x, self.classifier.weight)
             x = F.softmax(x, dim=1)
-            out = F.interpolate(x, size=(600,600), mode='bilinear')
+            out = F.interpolate(x, size=(480, 480), mode='bilinear')
         else:
             x = self.layer0(x)
             x = self.layer1(x)
