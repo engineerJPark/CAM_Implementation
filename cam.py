@@ -22,7 +22,9 @@ class resnet_cam(nn.Module):
         self.classifier = nn.Conv2d(512, 20, 1, bias=False)
 
         self.cam_flag = False
-
+        
+        self.backbone = nn.ModuleList([self.layer0, self.layer1, self.layer2, self.layer3, self.layer4])
+        self.new = nn.ModuleList([self.classifier])
 
     def forward(self, x):
         if self.cam_flag == True:
@@ -32,7 +34,7 @@ class resnet_cam(nn.Module):
             x = self.layer3(x)
             x = self.layer4(x)
             x = F.conv2d(x, self.classifier.weight)
-            x = F.softmax(x, dim=1)
+            x = F.softmax(x, dim=1) # in channel dimension
             out = F.interpolate(x, size=(480, 480), mode='bilinear')
         else:
             x = self.layer0(x)
@@ -42,8 +44,8 @@ class resnet_cam(nn.Module):
             x = self.layer4(x)
             x = self.avgpool(x)
             x = self.classifier(x)
-            x = F.softmax(x, dim=1)
-            out = x.view(-1)
+            x = F.softmax(x, dim=1) # in channel dimension
+            out = x.view(-1, 20)
         return out
 
     def switch2forward(self):
@@ -53,3 +55,6 @@ class resnet_cam(nn.Module):
     def switch2cam(self):
         self.cam_flag = True
         print("CAM mode")
+        
+    def trainable_parameters(self):
+        return (list(self.backbone.parameters()), list(self.new.parameters()))

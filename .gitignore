@@ -163,5 +163,6 @@ cython_debug/
 voc/VOCtrainval_11-May-2012.tar
 voc/VOCdevkit
 checkpoint
+result
 result_dep
 parttest.py
