@@ -8,7 +8,6 @@ from torchvision.datasets import VOCDetection
 from PIL import Image, ImageDraw, ImageFont
 from torchvision.transforms.functional import to_tensor, to_pil_image
 import torchvision.transforms as transforms
-from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 import albumentations as A
 from albumentations.pytorch import ToTensor
@@ -53,9 +52,7 @@ classes = [
 ]
 
 class myVOCDetection(VOCDetection):
-    def __getitem__(self, index):
-        random.seed(42) # Augmentation transform
-        
+    def __getitem__(self, index):    
         img = np.array(Image.open(self.images[index]).convert('RGB'))
         target = self.parse_voc_xml(ET.parse(self.annotations[index]).getroot()) # xml-> dictionary
 
@@ -104,9 +101,9 @@ trainval_ds = myVOCDetection(path2data, year='2012', image_set='trainval')
 val_ds = myVOCDetection(path2data, year='2012', image_set='val') # val_ds = myVOCDetection(path2data, year='2012', image_set='train')
 
 # transforms
-IMAGE_SIZE = 480 # image will become 480x480 size
+# IMAGE_SIZE = 480 # image will become 480x480 size
 train_transforms = A.Compose([
-                    A.Resize(IMAGE_SIZE, IMAGE_SIZE, interpolation=cv2.INTER_LINEAR),
+                    # A.Resize(IMAGE_SIZE, IMAGE_SIZE, interpolation=cv2.INTER_LINEAR),
                     ToTensor(),
                     
                     A.RandomRotate90(), # augmentation
@@ -119,7 +116,7 @@ train_transforms = A.Compose([
                     )
 
 val_transforms = A.Compose([ # no augmentation
-                    A.Resize(IMAGE_SIZE, IMAGE_SIZE, interpolation=cv2.INTER_LINEAR),
+                    # A.Resize(IMAGE_SIZE, IMAGE_SIZE, interpolation=cv2.INTER_LINEAR),
                     ToTensor()
                     ],
                     bbox_params=A.BboxParams(format='pascal_voc', min_visibility=0.4, label_fields=[])
@@ -134,3 +131,34 @@ val_ds.transforms = val_transforms
 train_dl = DataLoader(train_ds, batch_size=8, shuffle=True)
 trainval_dl = DataLoader(trainval_ds, batch_size=8, shuffle=True)
 val_dl = DataLoader(val_ds, batch_size=1, shuffle=False)
+
+
+# from chainercv.datasets import VOCSemanticSegmentationDataset
+
+# class myVOCSegmentation(VOCSemanticSegmentationDataset):
+#     def __getitem__(self, index):
+#         random.seed(42) # Augmentation transform
+        
+#         img = np.array(Image.open(self.images[index]).convert('RGB'))
+#         target = self.parse_voc_xml(ET.parse(self.annotations[index]).getroot()) # xml-> dictionary
+
+#         targets = [] # bb coord
+#         labels = [] # bb classes
+
+#         # Get bounding box information
+#         for t in target['annotation']['object']:
+#             label = np.zeros(5)
+#             label[:] = t['bndbox']['xmin'], t['bndbox']['ymin'], t['bndbox']['xmax'], t['bndbox']['ymax'], classes.index(t['name'])
+
+#             targets.append(list(label[:4])) # bb coord
+#             labels.append(label[4])         # bb classes, use this information for CAM only
+
+#         if self.transforms:
+#             augmentations = self.transforms(image=img, bboxes=targets)
+#             img = augmentations['image']
+#             targets = augmentations['bboxes']
+
+#         labels = torch.unique(torch.tensor(labels, dtype=torch.int64), sorted=True)
+#         labels = F.one_hot(labels, num_classes=20)
+#         labels = torch.sum(labels, dim = 0)
+#         return img, labels 

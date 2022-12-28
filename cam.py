@@ -28,6 +28,8 @@ class resnet_cam(nn.Module):
 
     def forward(self, x):
         if self.cam_flag == True:
+            ori_x, ori_y = x.shape[-2], x.shape[-1]
+            
             x = self.layer0(x)
             x = self.layer1(x)
             x = self.layer2(x)
@@ -35,7 +37,7 @@ class resnet_cam(nn.Module):
             x = self.layer4(x)
             x = F.conv2d(x, self.classifier.weight)
             x = F.softmax(x, dim=1) # in channel dimension
-            out = F.interpolate(x, size=(480, 480), mode='bilinear')
+            out = F.interpolate(x, size=(ori_x, ori_y), mode='bilinear')
         else:
             x = self.layer0(x)
             x = self.layer1(x)
@@ -50,10 +52,12 @@ class resnet_cam(nn.Module):
 
     def switch2forward(self):
         self.cam_flag = False
+        self.train()
         print("Forward mode")
 
     def switch2cam(self):
         self.cam_flag = True
+        self.eval()
         print("CAM mode")
         
     def trainable_parameters(self):
