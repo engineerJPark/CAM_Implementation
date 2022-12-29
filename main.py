@@ -23,13 +23,13 @@ if __name__ == '__main__':
     ############################ model training ############################
     model = Net().to(device)
 
-    # # model checkpoint reloading
-    # PATH = './checkpoint/model_12_28_22_24_1'
-    # checkpoint = torch.load(PATH)
-    # model.load_state_dict(checkpoint['model_state_dict'])
+    # model checkpoint reloading
+    PATH = './checkpoint/model_12_28_22_24_1'
+    checkpoint = torch.load(PATH)
+    model.load_state_dict(checkpoint['model_state_dict'])
     
-    lr = 0.001
-    weight_decay = 0.0001
+    lr = 0.1
+    weight_decay = 1e-4
     # epochs = 30
     epochs = 1
     
@@ -53,12 +53,10 @@ if __name__ == '__main__':
             f.write('train loss : ' + str(loss_history['train'][i]) + ', val loss : ' + str(loss_history['val'][i]))
             
     ############################ CAM print & evaluation ############################
-    cam_model = CAM().to(device)
-    
-    # model checkpoint reloading
-    checkpoint = torch.load(PATH)
-    cam_model.load_state_dict(checkpoint['model_state_dict'])
+    cam_model = CAM().to(device) # model checkpoint reloading
+    PATH = './checkpoint/res50_cam.pth'
+    cam_model.load_state_dict(torch.load(PATH), strict=True)
 
-    eval_cam(model, device=device)
-    print_cam(model, device=device)
+    eval_cam(cam_model, device=device)
+    print_cam(cam_model, device=device)
     

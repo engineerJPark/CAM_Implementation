@@ -8,7 +8,8 @@ from voc.voc import classes
 from chainercv.datasets import VOCSemanticSegmentationDataset
 
 def print_cam(model, device='cpu'):
-    # model.switch2cam()
+    model.eval()
+    print("CAM printing ...")
     
     dataset = VOCSemanticSegmentationDataset(split='train', data_dir='./voc/VOCdevkit/VOC2012')
     img = [dataset.get_example_by_keys(i, (0,))[0] for i in range(len(dataset))] 
@@ -28,5 +29,5 @@ def print_cam(model, device='cpu'):
         for channel_idx in range(cams.shape[0]): # superpose on image
             plt.imshow(val_img.squeeze().detach().cpu().numpy().transpose(1, 2, 0), alpha = 0.4)
             plt.imshow(val_img_pil[channel_idx], alpha = 0.4)
-            plt.savefig('./result/CAM_Result_%d_%s.png' % (i, classes[keys[channel_idx] - 1]))
+            plt.savefig('./result2/CAM_Result_%d_%s.png' % (i, classes[keys[channel_idx] - 1]))
             plt.clf()

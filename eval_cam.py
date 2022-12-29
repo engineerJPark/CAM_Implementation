@@ -10,7 +10,8 @@ from chainercv.datasets import VOCSemanticSegmentationDataset
 from chainercv.evaluations import calc_semantic_segmentation_confusion
 
 def eval_cam(model, device='cpu'):
-    model.switch2cam()
+    model.eval()
+    print("CAM evaluation")
     cam_eval_thres = 0.15
     
     dataset = VOCSemanticSegmentationDataset(split='train', data_dir='./voc/VOCdevkit/VOC2012')

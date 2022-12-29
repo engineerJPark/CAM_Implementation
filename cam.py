@@ -53,6 +53,7 @@ class CAM(Net):
         super(CAM, self).__init__()
 
     def forward(self, x):
+        ori_x, ori_y = x.shape[-2], x.shape[-1]
 
         x = self.stage1(x)
 
@@ -64,7 +65,8 @@ class CAM(Net):
 
         x = F.conv2d(x, self.classifier.weight)
         x = F.relu(x)
+        x = F.interpolate(x, size=(ori_x, ori_y), mode='bilinear')
 
-        x = x[0] + x[1].flip(-1)
+        # x = x[0] + x[1].flip(-1) # no prediction for fliped one
 
         return x

@@ -49,7 +49,11 @@ def train(model, optimizer, criterion, train_dataloader, validation_dataloader,
             last_loss = total_trainval_loss
 
     print("Training End!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    return loss_history, PATH
+    
+    if PATH is not None:
+        return loss_history, PATH
+    else:
+        return loss_history, None
 
 
 def validate(model, criterion, validation_dataloader, device='cpu'):
