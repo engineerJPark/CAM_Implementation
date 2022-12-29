@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 from train import train, PolyOptimizer
 
-from cam import resnet_cam
+from cam import Net, CAM
 from voc.voc import myVOCDetection, train_dl, trainval_dl, val_dl, classes
 from eval_cam import eval_cam
 from print_cam import print_cam
@@ -19,18 +19,19 @@ if __name__ == '__main__':
         torch.manual_seed(42)
     print("running is done on : ", device)
 
-    model = resnet_cam().to(device)
+
+    ############################ model training ############################
+    model = Net().to(device)
 
     # # model checkpoint reloading
     # PATH = './checkpoint/model_12_28_22_24_1'
     # checkpoint = torch.load(PATH)
     # model.load_state_dict(checkpoint['model_state_dict'])
     
-    # model training
     lr = 0.001
     weight_decay = 0.0001
-    epochs = 30
-    # epochs = 1
+    # epochs = 30
+    epochs = 1
     
     param_groups = model.trainable_parameters()
     optimizer = PolyOptimizer([
@@ -41,13 +42,6 @@ if __name__ == '__main__':
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=40000, gamma=0.1)
     loss_history, PATH = train(model, optimizer, criterion, train_dl, trainval_dl, save_freq=1, epochs=epochs, scheduler=None, device=device)
     
-    # model checkpoint reloading
-    checkpoint = torch.load(PATH)
-    model.load_state_dict(checkpoint['model_state_dict'])
-
-    eval_cam(model, device=device)
-    print_cam(model, device=device)
-    
     loss_history['train'] = loss_history['train']
     loss_history['val'] = loss_history['val']
     plt.plot(loss_history['train'])
@@ -57,4 +51,14 @@ if __name__ == '__main__':
     with open('./loss_history.txt','w',encoding='UTF-8') as f:
         for i in range(len(loss_history['val'])):
             f.write('train loss : ' + str(loss_history['train'][i]) + ', val loss : ' + str(loss_history['val'][i]))
+            
+    ############################ CAM print & evaluation ############################
+    cam_model = CAM().to(device)
+    
+    # model checkpoint reloading
+    checkpoint = torch.load(PATH)
+    cam_model.load_state_dict(checkpoint['model_state_dict'])
+
+    eval_cam(model, device=device)
+    print_cam(model, device=device)
     

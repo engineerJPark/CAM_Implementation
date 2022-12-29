@@ -8,7 +8,7 @@ from voc.voc import classes
 from chainercv.datasets import VOCSemanticSegmentationDataset
 
 def print_cam(model, device='cpu'):
-    model.switch2cam()
+    # model.switch2cam()
     
     dataset = VOCSemanticSegmentationDataset(split='train', data_dir='./voc/VOCdevkit/VOC2012')
     img = [dataset.get_example_by_keys(i, (0,))[0] for i in range(len(dataset))] 

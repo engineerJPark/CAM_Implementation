@@ -166,3 +166,4 @@ checkpoint
 result
 result_dep
 parttest.py
+cam_deprecated.py

@@ -9,7 +9,7 @@ def train(model, optimizer, criterion, train_dataloader, validation_dataloader,
     loss_history = {'train':[], 'val':[]}
     last_loss = 10 ** 9
 
-    model.switch2forward()
+    # model.switch2forward()
     print('train mode start!!!!!!!!!!!!!!!!!!!!!!!!!!')
 
     for epoch in range(epochs):
