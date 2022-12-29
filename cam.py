@@ -65,8 +65,9 @@ class CAM(Net):
 
         x = F.conv2d(x, self.classifier.weight)
         x = F.relu(x)
-        
+
         x = x[0] + x[1].flip(-1) # no prediction for fliped one
+        x = x.unsqueeze(dim=0)
         x = F.interpolate(x, size=(ori_x, ori_y), mode='bilinear')
 
         return x
