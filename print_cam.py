@@ -27,7 +27,7 @@ def print_cam(model, device='cpu'):
             val_img_pil.append(PIL.Image.fromarray(np.uint8(cm.jet(cams[channel_idx,:,:]) * 255)))
 
         for channel_idx in range(cams.shape[0]): # superpose on image
-            plt.imshow(val_img.squeeze().detach().cpu().numpy().transpose(1, 2, 0), alpha = 0.4)
+            plt.imshow(val_img[0].detach().cpu().numpy().transpose(1, 2, 0), alpha = 0.4)
             plt.imshow(val_img_pil[channel_idx], alpha = 0.4)
             plt.savefig('./result/CAM_Result_%d_%s.png' % (i, classes[keys[channel_idx] - 1]))
             plt.clf()
