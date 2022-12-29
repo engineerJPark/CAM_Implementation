@@ -20,18 +20,18 @@ if __name__ == '__main__':
     print("running is done on : ", device)
 
     model = resnet_cam().to(device)
-    model.switch2forward()
 
-    '''# model checkpoint reloading
-    PATH = './checkpoint/model_12_28_16_7_6'
-    checkpoint = torch.load(PATH)
-    model.load_state_dict(checkpoint['model_state_dict'])'''
+    # # model checkpoint reloading
+    # PATH = './checkpoint/model_12_28_22_24_1'
+    # checkpoint = torch.load(PATH)
+    # model.load_state_dict(checkpoint['model_state_dict'])
     
     # model training
-    lr = 0.01
+    lr = 0.001
     weight_decay = 0.0001
-    # epochs = 10
-    epochs = 1
+    epochs = 30
+    # epochs = 1
+    
     param_groups = model.trainable_parameters()
     optimizer = PolyOptimizer([
         {'params': param_groups[0], 'lr': lr, 'weight_decay': weight_decay},
@@ -39,15 +39,22 @@ if __name__ == '__main__':
         lr=lr, weight_decay=weight_decay, max_step=(len(train_dl) * epochs))
     criterion = nn.MultiLabelSoftMarginLoss().to(device)
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=40000, gamma=0.1)
-    loss_history = train(model, optimizer, criterion, train_dl, trainval_dl, val_chk_freq=1, epochs=epochs, scheduler=None, device=device)
+    loss_history, PATH = train(model, optimizer, criterion, train_dl, trainval_dl, save_freq=1, epochs=epochs, scheduler=None, device=device)
     
-    loss_history['train'] = loss_history['train'].cpu().numpy()
-    loss_history['val'] = loss_history['val'].cpu().numpy()
+    # model checkpoint reloading
+    checkpoint = torch.load(PATH)
+    model.load_state_dict(checkpoint['model_state_dict'])
+
+    eval_cam(model, device=device)
+    print_cam(model, device=device)
+    
+    loss_history['train'] = loss_history['train']
+    loss_history['val'] = loss_history['val']
     plt.plot(loss_history['train'])
     plt.plot(loss_history['val'])
     plt.savefig('./loss_history.png')
-    np.savetxt('./loss_history_train.txt', loss_history['train'])
-    np.savetxt('./loss_history_val.txt', loss_history['val'])
     
-    eval_cam(model, device=device)
-    print_cam(model, device=device)
+    with open('./loss_history.txt','w',encoding='UTF-8') as f:
+        for i in range(len(loss_history['val'])):
+            f.write('train loss : ' + str(loss_history['train'][i]) + ', val loss : ' + str(loss_history['val'][i]))
+    

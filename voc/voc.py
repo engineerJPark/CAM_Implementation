@@ -56,7 +56,7 @@ class myVOCDetection(VOCDetection):
         img = np.array(Image.open(self.images[index]).convert('RGB'))
         target = self.parse_voc_xml(ET.parse(self.annotations[index]).getroot()) # xml-> dictionary
 
-        targets = [] # bb coord
+        # targets = [] # bb coord
         labels = [] # bb classes
 
         # Get bounding box information
@@ -64,13 +64,13 @@ class myVOCDetection(VOCDetection):
             label = np.zeros(5)
             label[:] = t['bndbox']['xmin'], t['bndbox']['ymin'], t['bndbox']['xmax'], t['bndbox']['ymax'], classes.index(t['name'])
 
-            targets.append(list(label[:4])) # bb coord
+            # targets.append(list(label[:4])) # bb coord
             labels.append(label[4])         # bb classes, use this information for CAM only
 
         if self.transforms:
-            augmentations = self.transforms(image=img, bboxes=targets)
-            img = augmentations['image']
-            targets = augmentations['bboxes']
+            # augmentations = self.transforms(image=img, bboxes=targets)
+            img = self.transforms(image=img)['image']
+            # targets = augmentations['bboxes']
 
         labels = torch.unique(torch.tensor(labels, dtype=torch.int64), sorted=True)
         labels = F.one_hot(labels, num_classes=20)
@@ -102,25 +102,18 @@ val_ds = myVOCDetection(path2data, year='2012', image_set='val') # val_ds = myVO
 
 # transforms
 # IMAGE_SIZE = 480 # image will become 480x480 size
-train_transforms = A.Compose([
-                    # A.Resize(IMAGE_SIZE, IMAGE_SIZE, interpolation=cv2.INTER_LINEAR),
-                    ToTensor(),
-                    
+train_transforms = A.Compose([                  
                     A.RandomRotate90(), # augmentation
                     A.Transpose(),
                     A.ShiftScaleRotate(shift_limit=0.0625, scale_limit=0.50, rotate_limit=45, p=.75),
                     A.Blur(blur_limit=3),
                     A.OpticalDistortion(),
-                    ],
-                    bbox_params=A.BboxParams(format='pascal_voc', min_visibility=0.4, label_fields=[])
-                    )
+                    ToTensor()
+                    ]) 
 
 val_transforms = A.Compose([ # no augmentation
-                    # A.Resize(IMAGE_SIZE, IMAGE_SIZE, interpolation=cv2.INTER_LINEAR),
                     ToTensor()
-                    ],
-                    bbox_params=A.BboxParams(format='pascal_voc', min_visibility=0.4, label_fields=[])
-                    )
+                    ])
 
 # apply transforms
 train_ds.transforms = train_transforms
@@ -128,37 +121,6 @@ trainval_ds.transforms = train_transforms
 val_ds.transforms = val_transforms
 
 # dataloader definition
-train_dl = DataLoader(train_ds, batch_size=8, shuffle=True)
-trainval_dl = DataLoader(trainval_ds, batch_size=8, shuffle=True)
+train_dl = DataLoader(train_ds, batch_size=1, shuffle=True)
+trainval_dl = DataLoader(trainval_ds, batch_size=1, shuffle=True)
 val_dl = DataLoader(val_ds, batch_size=1, shuffle=False)
-
-
-# from chainercv.datasets import VOCSemanticSegmentationDataset
-
-# class myVOCSegmentation(VOCSemanticSegmentationDataset):
-#     def __getitem__(self, index):
-#         random.seed(42) # Augmentation transform
-        
-#         img = np.array(Image.open(self.images[index]).convert('RGB'))
-#         target = self.parse_voc_xml(ET.parse(self.annotations[index]).getroot()) # xml-> dictionary
-
-#         targets = [] # bb coord
-#         labels = [] # bb classes
-
-#         # Get bounding box information
-#         for t in target['annotation']['object']:
-#             label = np.zeros(5)
-#             label[:] = t['bndbox']['xmin'], t['bndbox']['ymin'], t['bndbox']['xmax'], t['bndbox']['ymax'], classes.index(t['name'])
-
-#             targets.append(list(label[:4])) # bb coord
-#             labels.append(label[4])         # bb classes, use this information for CAM only
-
-#         if self.transforms:
-#             augmentations = self.transforms(image=img, bboxes=targets)
-#             img = augmentations['image']
-#             targets = augmentations['bboxes']
-
-#         labels = torch.unique(torch.tensor(labels, dtype=torch.int64), sorted=True)
-#         labels = F.one_hot(labels, num_classes=20)
-#         labels = torch.sum(labels, dim = 0)
-#         return img, labels 

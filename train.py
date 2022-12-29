@@ -4,7 +4,7 @@ import os
 import torchvision.transforms as transforms
 
 def train(model, optimizer, criterion, train_dataloader, validation_dataloader, 
-            val_chk_freq=10, epochs=100, scheduler=None, device='cpu'):    
+            save_freq=10, epochs=100, scheduler=None, device='cpu'):    
     
     loss_history = {'train':[], 'val':[]}
     last_loss = 10 ** 9
@@ -38,9 +38,9 @@ def train(model, optimizer, criterion, train_dataloader, validation_dataloader,
         print('====================================')
         print("epoch %d, train loss : %f "%(epoch + 1, total_loss), "validation loss : %f "%(total_trainval_loss))
 
-        if (epoch + 1) % val_chk_freq == 0 and last_loss > total_trainval_loss:
+        if (epoch + 1) % save_freq == 0 and last_loss > total_trainval_loss:
             now = datetime.datetime.now()
-            PATH = "checkpoint/model_%d_%d_%d_%d_%d" % (now.month, now.day, now.hour, now.minute, epoch + 1)
+            PATH = "./checkpoint/model_%d_%d_%d_%d_%d" % (now.month, now.day, now.hour, now.minute, epoch + 1)
             torch.save({
                         'epoch': epoch + 1,
                         'model_state_dict': model.state_dict(),
@@ -49,7 +49,7 @@ def train(model, optimizer, criterion, train_dataloader, validation_dataloader,
             last_loss = total_trainval_loss
 
     print("Training End!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    return loss_history
+    return loss_history, PATH
 
 
 def validate(model, criterion, validation_dataloader, device='cpu'):
