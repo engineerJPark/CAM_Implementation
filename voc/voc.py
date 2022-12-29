@@ -69,12 +69,13 @@ class myVOCDetection(VOCDetection):
 
         if self.transforms:
             # augmentations = self.transforms(image=img, bboxes=targets)
-            img = self.transforms(image=img)['image']
             # targets = augmentations['bboxes']
+            img = self.transforms(image=img)['image']
+            
 
         labels = torch.unique(torch.tensor(labels, dtype=torch.int64), sorted=True)
         labels = F.one_hot(labels, num_classes=20)
-        labels = torch.sum(labels, dim = 0)
+        labels = torch.sum(labels, dim = 0)      
         return img, labels 
 
     # Dont have to touch this

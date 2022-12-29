@@ -32,7 +32,7 @@ class Net(nn.Module): # kill FC & add Conv
 
         x = torchutils.gap2d(x, keepdims=True)
         x = self.classifier(x)
-        x = x.view(-1, 20)
+        x = x.reshape(-1, 20)
 
         return x
 
@@ -65,8 +65,8 @@ class CAM(Net):
 
         x = F.conv2d(x, self.classifier.weight)
         x = F.relu(x)
+        
+        x = x[0] + x[1].flip(-1) # no prediction for fliped one
         x = F.interpolate(x, size=(ori_x, ori_y), mode='bilinear')
-
-        # x = x[0] + x[1].flip(-1) # no prediction for fliped one
 
         return x

@@ -16,10 +16,11 @@ def train(model, optimizer, criterion, train_dataloader, validation_dataloader,
         model.train()
         total_loss = 0
         for iter, (train_img, train_labels) in enumerate(train_dataloader):
-            # print("train_labels : ", train_labels) # for debug
-            score = model(normalization(train_img).to(device)) # might be [20]
-            score = torch.log(score)
-
+            train_img = train_img.squeeze()
+            train_img = torch.stack([train_img, torch.flip(train_img, [-1])])
+            train_labels = torch.stack((train_labels, train_labels))
+        
+            score = model(normalization(train_img).to(device)) # might be [2, 20]
             optimizer.zero_grad()
             loss = criterion(score, train_labels.reshape(-1, 20).to(device))
             loss.backward()
@@ -60,8 +61,10 @@ def validate(model, criterion, validation_dataloader, device='cpu'):
     model.eval()
     total_trainval_loss = 0
     for iter, (trainval_img, trainval_labels) in enumerate(validation_dataloader):
+        trainval_img = trainval_img.squeeze()
+        trainval_img = torch.stack([trainval_img, torch.flip(trainval_img, [-1])])
+        trainval_labels = torch.stack((trainval_labels, trainval_labels))
         score = model(normalization(trainval_img).to(device))
-        score = torch.log(score)
         
         loss = criterion(score, trainval_labels.reshape(-1, 20).to(device))
         total_trainval_loss += float(loss)

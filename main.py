@@ -24,13 +24,13 @@ if __name__ == '__main__':
     model = Net().to(device)
 
     # model checkpoint reloading
-    PATH = './checkpoint/model_12_28_22_24_1'
-    checkpoint = torch.load(PATH)
-    model.load_state_dict(checkpoint['model_state_dict'])
+    # PATH = ''
+    # checkpoint = torch.load(PATH)
+    # model.load_state_dict(checkpoint['model_state_dict'])
     
     lr = 0.1
     weight_decay = 1e-4
-    # epochs = 30
+    # epochs = 5
     epochs = 1
     
     param_groups = model.trainable_parameters()
@@ -44,17 +44,19 @@ if __name__ == '__main__':
     
     loss_history['train'] = loss_history['train']
     loss_history['val'] = loss_history['val']
-    plt.plot(loss_history['train'])
-    plt.plot(loss_history['val'])
+    plt.plot(loss_history['train'], label='train loss')
+    plt.plot(loss_history['val'], label='validation loss')
+    plt.legend()
     plt.savefig('./loss_history.png')
+    plt.clf()
     
     with open('./loss_history.txt','w',encoding='UTF-8') as f:
         for i in range(len(loss_history['val'])):
-            f.write('train loss : ' + str(loss_history['train'][i]) + ', val loss : ' + str(loss_history['val'][i]))
+            f.write('train loss : ' + str(loss_history['train'][i]) + ', val loss : ' + str(loss_history['val'][i]) + '\n')
             
     ############################ CAM print & evaluation ############################
     cam_model = CAM().to(device) # model checkpoint reloading
-    PATH = './checkpoint/res50_cam.pth'
+    # PATH = './checkpoint/res50_cam.pth'
     cam_model.load_state_dict(torch.load(PATH), strict=True)
 
     eval_cam(cam_model, device=device)

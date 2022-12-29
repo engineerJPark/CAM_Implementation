@@ -17,7 +17,7 @@ def print_cam(model, device='cpu'):
     
     preds = []
     for i in range(len(dataset)):
-        val_img = torch.from_numpy(img[i]).unsqueeze(dim=0) / 255.
+        val_img = torch.from_numpy(np.ndarray([img[i], np.flip(img[i], -1)])).unsqueeze(dim=0) / 255.
         keys = np.unique(labels[i])[2:]
         cams = model(normalization(val_img).to(device)).squeeze()[keys - 1].detach().cpu().numpy() # 1,20,480,480 -> n_of_GT,480,480
               
@@ -29,5 +29,5 @@ def print_cam(model, device='cpu'):
         for channel_idx in range(cams.shape[0]): # superpose on image
             plt.imshow(val_img.squeeze().detach().cpu().numpy().transpose(1, 2, 0), alpha = 0.4)
             plt.imshow(val_img_pil[channel_idx], alpha = 0.4)
-            plt.savefig('./result2/CAM_Result_%d_%s.png' % (i, classes[keys[channel_idx] - 1]))
+            plt.savefig('./result/CAM_Result_%d_%s.png' % (i, classes[keys[channel_idx] - 1]))
             plt.clf()

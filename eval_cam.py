@@ -20,7 +20,7 @@ def eval_cam(model, device='cpu'):
     
     preds = []
     for i in range(len(dataset)):
-        val_img = torch.from_numpy(img[i]).unsqueeze(dim=0) # print(val_img.shape)
+        val_img = torch.from_numpy(np.ndarray([img[i], np.flip(img[i], -1)])).unsqueeze(dim=0) / 255.
         keys = np.unique(labels[i])[2:]
              
         cams = model(normalization(val_img).to(device)).squeeze()[keys - 1].detach().cpu().numpy() # 1,20,480,480 -> n_of_GT,480,480
