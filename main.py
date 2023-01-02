@@ -21,16 +21,16 @@ if __name__ == '__main__':
 
 
     ############################ model training ############################
-    # model = Net().to(device)
+    model = Net().to(device)
 
-    # # model checkpoint reloading
-    # # PATH = ''
-    # # checkpoint = torch.load(PATH)
-    # # model.load_state_dict(checkpoint['model_state_dict'])
+    # ### model checkpoint reloading
+    # PATH = './checkpoint/model_12_29_18_28_5'
+    # checkpoint = torch.load(PATH)
+    # model.load_state_dict(checkpoint['model_state_dict'])
     
     # lr = 0.01
     # weight_decay = 1e-5
-    # epochs = 5
+    # epochs = 10
     # # epochs = 1
     
     # param_groups = model.trainable_parameters()
@@ -59,6 +59,6 @@ if __name__ == '__main__':
     PATH = './checkpoint/model_12_29_18_28_5'
     cam_model.load_state_dict(torch.load(PATH)['model_state_dict'], strict=True)
 
-    eval_cam(cam_model, device=device)
+    # eval_cam(cam_model, device=device)
     print_cam(cam_model, device=device)
     

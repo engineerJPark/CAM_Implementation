@@ -1,3 +1,4 @@
+import os
 from matplotlib import cm
 import matplotlib.pyplot as plt
 import PIL
@@ -16,10 +17,12 @@ def print_cam(model, device='cpu'):
     labels = [dataset.get_example_by_keys(i, (1,))[0] for i in range(len(dataset))] # segmentation label for all sample
     
     preds = []
-    for i in range(len(dataset)):
+    for i, id in enumerate(dataset.ids):
+        print(id) # for debug
         val_img = torch.from_numpy(np.array([img[i], np.flip(img[i], -1)])) / 255.
         keys = np.unique(labels[i])[2:]
         cams = model(normalization(val_img).to(device)).squeeze()[keys - 1].detach().cpu().numpy() # 1,20,480,480 -> n_of_GT,480,480
+        cams[cams < 0.1] = 0.0
               
         # for CAM image
         val_img_pil = []
@@ -29,5 +32,9 @@ def print_cam(model, device='cpu'):
         for channel_idx in range(cams.shape[0]): # superpose on image
             plt.imshow(val_img[0].detach().cpu().numpy().transpose(1, 2, 0), alpha = 0.4)
             plt.imshow(val_img_pil[channel_idx], alpha = 0.4)
-            plt.savefig('./result/CAM_Result_%d_%s.png' % (i, classes[keys[channel_idx] - 1]))
+            plt.savefig('./result/CAM_Result_%s_%s.png' % (id, classes[keys[channel_idx] - 1]))
             plt.clf()
+
+        
+        # npy exporting
+        np.save(os.path.join('./cam_result', id + '.npy'), {"keys": keys, "cam": cams})
