@@ -38,11 +38,13 @@ if __name__ == '__main__':
     parser.add_argument("--log_name", default="sample_train_eval", type=str)
     parser.add_argument("--cam_weights_name", default="savefile/pretrained/res50_cam.pth", type=str)
     parser.add_argument("--cam_out_dir", default="savefile/result/cam", type=str)
+    parser.add_argument("--cam_on_img_dir", default="savefile/result/cam_on_img", type=str)
 
     # Step
     parser.add_argument("--train_cam_pass", default=True)
     parser.add_argument("--make_cam_pass", default=True)
     parser.add_argument("--eval_cam_pass", default=True)
+    parser.add_argument("--draw_cam_pass", default=True)
 
     args = parser.parse_args()
 
@@ -50,6 +52,7 @@ if __name__ == '__main__':
     os.makedirs("savefile/result", exist_ok=True)
     os.makedirs("savefile/pretrained", exist_ok=True)
     os.makedirs(args.cam_out_dir, exist_ok=True)
+    os.makedirs(args.cam_on_img_dir, exist_ok=True)
 
     pyutils.Logger(args.log_name + '.log')
     print(vars(args))
@@ -68,3 +71,10 @@ if __name__ == '__main__':
         import step.eval_cam
         timer = pyutils.Timer('step.eval_cam:')
         step.eval_cam.run(args)
+
+    if args.draw_cam_pass is True:
+        import step.draw_cam
+        timer = pyutils.Timer('step.draw_cam:')
+        step.draw_cam.run(args)
+
+# python main.py --train_cam_pass=False --make_cam_pass=False

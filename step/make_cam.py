@@ -26,7 +26,7 @@ def _work(process_id, model, dataset, args):
         for iter, pack in enumerate(data_loader):
 
             img_name = pack['name'][0]
-            label = pack['label'][0]
+            label = pack['label'][0] # one hot encoded
             size = pack['size']
 
             strided_size = imutils.get_strided_size(size, 4)
@@ -43,13 +43,18 @@ def _work(process_id, model, dataset, args):
                                          mode='bilinear', align_corners=False) for o in outputs]
             highres_cam = torch.sum(torch.stack(highres_cam, 0), 0)[:, 0, :size[0], :size[1]]
 
-            valid_cat = torch.nonzero(label)[:, 0]
-
+            valid_cat = torch.nonzero(label)[:, 0] # nonzero label index for all batch
+            
+            # print(label) # for debug
+            # print(valid_cat) # for debug
+            
             strided_cam = strided_cam[valid_cat]
-            strided_cam /= F.adaptive_max_pool2d(strided_cam, (1, 1)) + 1e-5
+            strided_cam /= F.adaptive_max_pool2d(strided_cam, (1, 1)) + 1e-5 # Normalization
 
             highres_cam = highres_cam[valid_cat]
-            highres_cam /= F.adaptive_max_pool2d(highres_cam, (1, 1)) + 1e-5
+            highres_cam /= F.adaptive_max_pool2d(highres_cam, (1, 1)) + 1e-5 # Normalization
+            
+            # print(highres_cam.shape) # for debug
 
             # save cams
             np.save(os.path.join(args.cam_out_dir, img_name + '.npy'),
