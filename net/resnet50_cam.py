@@ -1,10 +1,10 @@
 import torch.nn as nn
 import torch.nn.functional as F
-import torchutils
-import resnet50
+from misc import torchutils
+from net import resnet50
 
 
-class Net(nn.Module): # kill FC & add Conv
+class Net(nn.Module):
 
     def __init__(self):
         super(Net, self).__init__()
@@ -32,7 +32,7 @@ class Net(nn.Module): # kill FC & add Conv
 
         x = torchutils.gap2d(x, keepdims=True)
         x = self.classifier(x)
-        x = x.reshape(-1, 20)
+        x = x.view(-1, 20)
 
         return x
 
@@ -53,7 +53,6 @@ class CAM(Net):
         super(CAM, self).__init__()
 
     def forward(self, x):
-        ori_x, ori_y = x.shape[-2], x.shape[-1]
 
         x = self.stage1(x)
 
@@ -66,8 +65,6 @@ class CAM(Net):
         x = F.conv2d(x, self.classifier.weight)
         x = F.relu(x)
 
-        x = x[0] + x[1].flip(-1) # no prediction for fliped one
-        x = x.unsqueeze(dim=0)
-        x = F.interpolate(x, size=(ori_x, ori_y), mode='bilinear')
+        x = x[0] + x[1].flip(-1)
 
         return x

@@ -160,11 +160,6 @@ cython_debug/
 #.idea/
 
 
-voc/VOCtrainval_11-May-2012.tar
-voc/VOCdevkit
-checkpoint
-result
-cam_result
-result_dep
-parttest.py
-cam_deprecated.py
+dataset
+savefile
+test.py
