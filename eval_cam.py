@@ -41,3 +41,11 @@ def eval_cam(model, device='cpu'):
     iou = gtjresj / denominator
 
     print({'iou': iou, 'miou': np.nanmean(iou)})
+    
+    with open('./evaluation_cam.txt','w',encoding='UTF-8') as f:
+        f.write('iou : ')
+        f.write('\n')
+        for v in iou:
+            f.write(str(v))
+            f.write('\n')
+        f.write('miou : %s' % (str(np.nanmean(iou))))
