@@ -23,8 +23,6 @@ CAT_LIST = ['aeroplane', 'bicycle', 'bird', 'boat',
         'sheep', 'sofa', 'train',
         'tvmonitor']
 
-# cudnn.enabled = True
-
 def _work(process_id, dataset, args):
 
     databin = dataset[process_id]
@@ -39,14 +37,14 @@ def _work(process_id, dataset, args):
             valid_cat = torch.nonzero(label)[:, 0] # nonzero label index for all batch
             
             img = PIL.Image.open(os.path.join(args.voc12_root, 'JPEGImages', name_str + '.jpg'))
-            cam_img = np.load(args.cam_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res']
+            cam_img = np.load(args.origin_cam_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res'] # not args.cam_out_dir
             
             # do densecrf to CAM 
-            cam_img_crf = crf_inference_softmax(img, cam_img, n_labels=valid_cat.shape[0])
+            cam_img_crf = crf_inference_softmax(np.asarray(img), cam_img, t=10, scale_factor=0.5, n_labels=valid_cat.shape[0])
             
             # save cams
             np.save(os.path.join(args.cam_out_dir, name_str + '.npy'),
-                    {"keys": valid_cat, "high_res": cam_img_crf.cpu().numpy()})
+                    {"keys": valid_cat, "high_res": cam_img_crf})
 
             if process_id == n_gpus - 1 and iter % (len(databin) // 20) == 0:
                 print("%d " % ((5*iter+1)//(len(databin) // 20)), end='')

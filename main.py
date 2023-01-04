@@ -37,8 +37,8 @@ if __name__ == '__main__':
     # Output Path
     parser.add_argument("--log_name", default="sample_train_eval", type=str)
     parser.add_argument("--cam_weights_name", default="savefile/pretrained/res50_cam.pth", type=str)
-    parser.add_argument("--cam_out_dir", default="savefile/result/cam", type=str)
-    parser.add_argument("--cam_on_img_dir", default="savefile/result/cam_on_img", type=str)
+    parser.add_argument("--cam_save_dir", required=True, type=str) # cam, cam_crf, cam_aff
+    parser.add_argument("--origin_cam_dir", default="savefile/result/cam", type=str)
 
     # Step
     parser.add_argument("--train_cam_pass", default=True)
@@ -49,6 +49,8 @@ if __name__ == '__main__':
     # parser.add_argument("--train_cam_aff_pass", default=True)
 
     args = parser.parse_args()
+    args.cam_out_dir = "savefile/result/" + args.cam_save_dir
+    args.cam_on_img_dir = "savefile/result/" + args.cam_save_dir + "_on_img"
 
     os.makedirs("savefile", exist_ok=True)
     os.makedirs("savefile/result", exist_ok=True)
