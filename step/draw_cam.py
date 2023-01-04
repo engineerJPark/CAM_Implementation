@@ -63,7 +63,6 @@ def run(args):
 
     print('[ ', end='')
     multiprocessing.spawn(_work, nprocs=n_gpus, args=(dataset, args), join=True)
-    # _work(0, dataset, args)
     print(']')
 
     torch.cuda.empty_cache()

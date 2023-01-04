@@ -2,10 +2,10 @@
 
 Class Activation Map(CAM) implementation by PyTorch. Paper can be seen in [here.](https://arxiv.org/abs/1512.04150)
 
-Implementation detail is different from the original implementation from [this github](https://github.com/zhoubolei/CAM)
+Implementation detail is different from the original implementation from [this repository](https://github.com/zhoubolei/CAM)
 
 
-# TroubleShooting
+# About TroubleShooting
 
 use this command for treating the error on 'typing-extensions' : 
 
@@ -26,3 +26,8 @@ pip install chainercv
 for spend some lazy times... use tmux.
 
 `sudo apt-get install tmux`
+
+
+# Acknowledgements
+
+Last version of this repository has so many bugs, so it leads to borrow base codes from [IRN implementation](https://github.com/jiwoon-ahn/irn). Applying denseCRF and AffinityNet is heavily done from original repository.
