@@ -45,6 +45,8 @@ if __name__ == '__main__':
     parser.add_argument("--make_cam_pass", default=True)
     parser.add_argument("--eval_cam_pass", default=True)
     parser.add_argument("--draw_cam_pass", default=True)
+    # parser.add_argument("--densecrf_pass", default=True)
+    # parser.add_argument("--affinity_pass", default=True)
 
     args = parser.parse_args()
 
@@ -76,5 +78,15 @@ if __name__ == '__main__':
         import step.draw_cam
         timer = pyutils.Timer('step.draw_cam:')
         step.draw_cam.run(args)
+        
+    # if args.densecrf_pass is True:
+    #     import step.densecrf_pass
+    #     timer = pyutils.Timer('step.densecrf_pass:')
+    #     step.densecrf_pass.run(args)
+        
+    # if args.affinity_pass is True:
+    #     import step.affinity_pass
+    #     timer = pyutils.Timer('step.v:')
+    #     step.affinity_pass.run(args)
 
-# python main.py --train_cam_pass=False --make_cam_pass=False
+# python main.py --train_cam_pass=False --make_cam_pass=False --eval_cam_pass=False

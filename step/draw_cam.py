@@ -24,31 +24,28 @@ CAT_LIST = ['aeroplane', 'bicycle', 'bird', 'boat',
 
 cudnn.enabled = True
 
-def _work(process_id, model, dataset, args):
+def _work(process_id, dataset, args):
 
     databin = dataset[process_id]
     n_gpus = torch.cuda.device_count()
     data_loader = DataLoader(databin, shuffle=False, num_workers=args.num_workers // n_gpus, pin_memory=False)
 
     with torch.no_grad(), cuda.device(process_id):
-
-        model.cuda()
-
         for iter, pack in enumerate(data_loader):
             # load cam npy
-            name_str = pack['name_str'][0]
-            img = pack['img'][0]
+            name_str = pack['name'][0]
             label = pack['label'][0] # one hot encoded
             valid_cat = torch.nonzero(label)[:, 0] # nonzero label index for all batch
             
-            cam_img = np.load(args.cam_out_dir + '/' + name_str + '.npy').item()['high_res']
+            img = PIL.Image.open(os.path.join(args.voc12_root, 'JPEGImages', name_str + '.jpg'))
+            cam_img = np.load(args.cam_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res']
             
             # save cam image
             cam_img_pil = []
             for channel_idx in range(cam_img.shape[0]): # cam img for each class + coloring
                 cam_img_pil.append(PIL.Image.fromarray(np.uint8(cm.jet(cam_img[channel_idx,:,:]) * 255)))
             for channel_idx in range(cam_img.shape[0]): # superpose on image
-                plt.imshow(img.detach().cpu().numpy().transpose(1, 2, 0), alpha = 0.4)
+                plt.imshow(img, alpha = 0.4)
                 plt.imshow(cam_img_pil[channel_idx], alpha = 0.4)
                 plt.savefig(args.cam_on_img_dir + '/cam_%s_%s.png' % (name_str, CAT_LIST[valid_cat[channel_idx]]))
                 plt.clf()
@@ -66,6 +63,7 @@ def run(args):
 
     print('[ ', end='')
     multiprocessing.spawn(_work, nprocs=n_gpus, args=(dataset, args), join=True)
+    # _work(0, dataset, args)
     print(']')
 
     torch.cuda.empty_cache()
