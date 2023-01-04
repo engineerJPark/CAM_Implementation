@@ -3,21 +3,20 @@ import torch.nn as nn
 import torch.nn.functional as F
 from net import resnet50
 
+
 class Net(nn.Module):
 
     def __init__(self):
         super(Net, self).__init__()
 
-        self.resnet50 = resnet50.resnet50(pretrained=True, strides=(2, 2, 2, 1))
+        # backbone
+        self.resnet50 = resnet50.resnet50(pretrained=True, strides=[2, 2, 2, 1])
 
-        self.stage1 = nn.Sequential(self.resnet50.conv1, self.resnet50.bn1, self.resnet50.relu, self.resnet50.maxpool,
-                                    self.resnet50.layer1)
-        self.stage2 = nn.Sequential(self.resnet50.layer2)
-        self.stage3 = nn.Sequential(self.resnet50.layer3)
-        self.stage4 = nn.Sequential(self.resnet50.layer4)
-
-        #####################################
-        ### different with resnet cam 
+        self.stage1 = nn.Sequential(self.resnet50.conv1, self.resnet50.bn1, self.resnet50.relu, self.resnet50.maxpool)
+        self.stage2 = nn.Sequential(self.resnet50.layer1)
+        self.stage3 = nn.Sequential(self.resnet50.layer2)
+        self.stage4 = nn.Sequential(self.resnet50.layer3)
+        self.stage5 = nn.Sequential(self.resnet50.layer4)
         self.mean_shift = Net.MeanShift(2)
 
         # branch: class boundary detection
@@ -51,9 +50,52 @@ class Net(nn.Module):
         )
         self.fc_edge6 = nn.Conv2d(160, 1, 1, bias=True)
 
-        self.backbone = nn.ModuleList([self.stage1, self.stage2, self.stage3, self.stage4])
+        # branch: displacement field
+        self.fc_dp1 = nn.Sequential(
+            nn.Conv2d(64, 64, 1, bias=False),
+            nn.GroupNorm(8, 64),
+            nn.ReLU(inplace=True),
+        )
+        self.fc_dp2 = nn.Sequential(
+            nn.Conv2d(256, 128, 1, bias=False),
+            nn.GroupNorm(16, 128),
+            nn.ReLU(inplace=True),
+        )
+        self.fc_dp3 = nn.Sequential(
+            nn.Conv2d(512, 256, 1, bias=False),
+            nn.GroupNorm(16, 256),
+            nn.ReLU(inplace=True),
+        )
+        self.fc_dp4 = nn.Sequential(
+            nn.Conv2d(1024, 256, 1, bias=False),
+            nn.GroupNorm(16, 256),
+            nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
+            nn.ReLU(inplace=True),
+        )
+        self.fc_dp5 = nn.Sequential(
+            nn.Conv2d(2048, 256, 1, bias=False),
+            nn.GroupNorm(16, 256),
+            nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
+            nn.ReLU(inplace=True),
+        )
+        self.fc_dp6 = nn.Sequential(
+            nn.Conv2d(768, 256, 1, bias=False),
+            nn.GroupNorm(16, 256),
+            nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
+            nn.ReLU(inplace=True),
+        )
+        self.fc_dp7 = nn.Sequential(
+            nn.Conv2d(448, 256, 1, bias=False),
+            nn.GroupNorm(16, 256),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(256, 2, 1, bias=False),
+            self.mean_shift
+        )
+
+        self.backbone = nn.ModuleList([self.stage1, self.stage2, self.stage3, self.stage4, self.stage5])
         self.edge_layers = nn.ModuleList([self.fc_edge1, self.fc_edge2, self.fc_edge3, self.fc_edge4, self.fc_edge5, self.fc_edge6])
-        
+        self.dp_layers = nn.ModuleList([self.fc_dp1, self.fc_dp2, self.fc_dp3, self.fc_dp4, self.fc_dp5, self.fc_dp6, self.fc_dp7])
+
     class MeanShift(nn.Module):
 
         def __init__(self, num_features):
@@ -78,11 +120,21 @@ class Net(nn.Module):
         edge4 = self.fc_edge4(x4)[..., :edge2.size(2), :edge2.size(3)]
         edge5 = self.fc_edge5(x5)[..., :edge2.size(2), :edge2.size(3)]
         edge_out = self.fc_edge6(torch.cat([edge1, edge2, edge3, edge4, edge5], dim=1))
-        
-        return edge_out
-    
+
+        dp1 = self.fc_dp1(x1)
+        dp2 = self.fc_dp2(x2)
+        dp3 = self.fc_dp3(x3)
+        dp4 = self.fc_dp4(x4)[..., :dp3.size(2), :dp3.size(3)]
+        dp5 = self.fc_dp5(x5)[..., :dp3.size(2), :dp3.size(3)]
+
+        dp_up3 = self.fc_dp6(torch.cat([dp3, dp4, dp5], dim=1))[..., :dp2.size(2), :dp2.size(3)]
+        dp_out = self.fc_dp7(torch.cat([dp1, dp2, dp_up3], dim=1))
+
+        return edge_out, dp_out
+
     def trainable_parameters(self):
-        return self.edge_layers.parameters()
+        return (tuple(self.edge_layers.parameters()),
+                tuple(self.dp_layers.parameters()))
 
     def train(self, mode=True):
         super().train(mode)
@@ -180,4 +232,3 @@ class EdgeDisplacement(Net):
         dp_out = dp_out[0]
 
         return edge_out, dp_out
-
