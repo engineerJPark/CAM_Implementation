@@ -150,6 +150,10 @@ def to_transition_matrix(affinity_dense, beta, times):
     return trans_mat
 
 def propagate_to_edge(x, edge, radius=5, beta=10, exp_times=8):
+    '''
+    do Random Walk
+    x dimension is C x HW 
+    '''
 
     height, width = x.shape[-2:]
 
