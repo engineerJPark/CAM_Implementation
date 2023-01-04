@@ -97,7 +97,6 @@ class Net(nn.Module):
         self.dp_layers = nn.ModuleList([self.fc_dp1, self.fc_dp2, self.fc_dp3, self.fc_dp4, self.fc_dp5, self.fc_dp6, self.fc_dp7])
 
     class MeanShift(nn.Module):
-
         def __init__(self, num_features):
             super(Net.MeanShift, self).__init__()
             self.register_buffer('running_mean', torch.zeros(num_features))
