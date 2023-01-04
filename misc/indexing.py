@@ -4,7 +4,9 @@ import numpy as np
 
 
 class PathIndex:
-
+    '''
+    Class for getting path index for Random Walk
+    '''
     def __init__(self, radius, default_size):
         self.radius = radius
         self.radius_floor = int(np.ceil(radius) - 1)
@@ -16,7 +18,7 @@ class PathIndex:
 
     def get_search_paths_dst(self, max_radius=5):
         '''
-        ??????????
+        get distance for the searching path 
         '''
 
         coord_indices_by_length = [[] for _ in range(max_radius * 4)]
@@ -25,32 +27,32 @@ class PathIndex:
 
         for x in range(1, max_radius):
             search_dirs.append((0, x))
-
+        
         for y in range(1, max_radius):
             for x in range(-max_radius + 1, max_radius):
                 if x * x + y * y < max_radius ** 2:
                     search_dirs.append((y, x))
+        
+        for dir in search_dirs: # for each position
 
-        for dir in search_dirs:
+            length_sq = dir[0] ** 2 + dir[1] ** 2 # squared length
+            path_coords = [] # list for save paths
 
-            length_sq = dir[0] ** 2 + dir[1] ** 2
-            path_coords = []
-
-            min_y, max_y = sorted((0, dir[0]))
+            min_y, max_y = sorted((0, dir[0])) # ordering
             min_x, max_x = sorted((0, dir[1]))
 
-            for y in range(min_y, max_y + 1):
+            for y in range(min_y, max_y + 1): # for all area of direction
                 for x in range(min_x, max_x + 1):
 
-                    dist_sq = (dir[0] * x - dir[1] * y) ** 2 / length_sq
+                    dist_sq = (dir[0] * x - dir[1] * y) ** 2 / length_sq # why calculated by this?
 
-                    if dist_sq < 1:
+                    if dist_sq < 1: # restrict the random walk inside the radius
                         path_coords.append([y, x])
 
-            path_coords.sort(key=lambda x: -abs(x[0]) - abs(x[1]))
+            path_coords.sort(key=lambda x: -abs(x[0]) - abs(x[1])) # sorting by  -- to ++
             path_length = len(path_coords)
 
-            coord_indices_by_length[path_length].append(path_coords)
+            coord_indices_by_length[path_length].append(path_coords) # index for each length 0, 1, ... 
 
         path_list_by_length = [np.asarray(v) for v in coord_indices_by_length if v]
         path_destinations = np.concatenate([p[:, 0] for p in path_list_by_length], axis=0)
@@ -58,15 +60,21 @@ class PathIndex:
         return path_list_by_length, path_destinations
 
     def get_path_indices(self, size):
+        '''
+        get index for path        
+        '''
 
+        # get index for full image size 
         full_indices = np.reshape(np.arange(0, size[0] * size[1], dtype=np.int64), (size[0], size[1]))
 
-        cropped_height = size[0] - self.radius_floor
+        # get crop size
+        cropped_height = size[0] - self.radius_floor # why not double???
         cropped_width = size[1] - 2 * self.radius_floor
 
-        path_indices = []
+        path_indices = [] # get index
 
-        for paths in self.search_paths:
+        # use paths searched by previous function
+        for paths in self.search_paths: 
 
             path_indices_list = []
             for p in paths:
@@ -84,9 +92,10 @@ class PathIndex:
 
             path_indices.append(np.array(path_indices_list))
 
+        # find index for start random walk, and distance
         src_indices = np.reshape(full_indices[:cropped_height, self.radius_floor:self.radius_floor + cropped_width], -1)
         dst_indices = np.concatenate([p[:,0] for p in path_indices], axis=0)
-
+ 
         return path_indices, src_indices, dst_indices
 
 

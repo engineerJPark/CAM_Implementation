@@ -84,6 +84,10 @@ class Timer:
 
 
 def to_one_hot(sparse_integers, maximum_val=None, dtype=np.bool):
+    '''
+    output is maximal x labels
+    output range is 0 ~ maximal
+    '''
 
     if maximum_val is None:
         maximum_val = np.max(sparse_integers) + 1
