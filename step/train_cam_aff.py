@@ -2,34 +2,37 @@ import torch
 import torch.nn as nn
 from torch.backends import cudnn
 cudnn.enabled = True
+import multiprocessing
 from torch.utils.data import DataLoader
 import voc12.dataloader
 from misc import pyutils, torchutils, indexing
 import importlib
 
-def run(args):
+def _work(model, train_dataset, infer_dataset, args):
 
 
-    path_index = indexing.PathIndex(radius=10, default_size=(args.irn_crop_size // 4, args.irn_crop_size // 4))
+    # path_index = indexing.PathIndex(radius=10, default_size=(args.irn_crop_size // 4, args.irn_crop_size // 4))
 
-    model = getattr(importlib.import_module(args.irn_network), 'AffinityDisplacementLoss')(
-        path_index)
+    # model = getattr(importlib.import_module(args.irn_network), 'AffinityDisplacementLoss')(
+    #     path_index)
     
-    if torch.cuda.device_count() > 1:
-        print("Let's use", torch.cuda.device_count(), "GPUs!") # dim = 0 [30, xxx] -> [10, ...], [10, ...], [10, ...] on 3 GPUs
-        model = nn.DataParallel(model)
+    # if torch.cuda.device_count() > 1:
+    #     print("Let's use", torch.cuda.device_count(), "GPUs!") # dim = 0 [30, xxx] -> [10, ...], [10, ...], [10, ...] on 3 GPUs
+    #     model = nn.DataParallel(model)
+    
     model.cuda()
 
-    train_dataset = voc12.dataloader.VOC12AffinityDataset(args.train_list,
-                                                          label_dir=args.ir_label_out_dir,
-                                                          voc12_root=args.voc12_root,
-                                                          indices_from=path_index.src_indices,
-                                                          indices_to=path_index.dst_indices,
-                                                          hor_flip=True,
-                                                          crop_size=args.irn_crop_size,
-                                                          crop_method="random",
-                                                          rescale=(0.5, 1.5)
-                                                          )
+    # train_dataset = voc12.dataloader.VOC12AffinityDataset(args.train_list,
+    #                                                       label_dir=args.ir_label_out_dir,
+    #                                                       voc12_root=args.voc12_root,
+    #                                                       indices_from=path_index.src_indices,
+    #                                                       indices_to=path_index.dst_indices,
+    #                                                       hor_flip=True,
+    #                                                       crop_size=args.irn_crop_size,
+    #                                                       crop_method="random",
+    #                                                       rescale=(0.5, 1.5)
+    #                                                       )
+    
     train_data_loader = DataLoader(train_dataset, batch_size=args.irn_batch_size,
                                    shuffle=True, num_workers=args.num_workers, pin_memory=True, drop_last=True)
 
@@ -116,15 +119,37 @@ def run(args):
     torch.save(model.module.state_dict(), args.irn_weights_name)
     torch.cuda.empty_cache()
 
+
 def run(args):
+    path_index = indexing.PathIndex(radius=10, default_size=(args.irn_crop_size // 4, args.irn_crop_size // 4))
+    model = getattr(importlib.import_module(args.irn_network), 'AffinityDisplacementLoss')(path_index)
     n_gpus = torch.cuda.device_count()
 
-    dataset = voc12.dataloader.VOC12ClassificationDatasetMSF(args.train_list,
-                                                             voc12_root=args.voc12_root, scales=args.cam_scales)
-    dataset = torchutils.split_dataset(dataset, n_gpus)
+    # dataset = voc12.dataloader.VOC12ClassificationDatasetMSF(args.train_list,
+    #                                                          voc12_root=args.voc12_root, scales=args.cam_scales)
+    
+    train_dataset = voc12.dataloader.VOC12AffinityDataset(args.train_list,
+                                                          label_dir=args.ir_label_out_dir,
+                                                          voc12_root=args.voc12_root,
+                                                          indices_from=path_index.src_indices,
+                                                          indices_to=path_index.dst_indices,
+                                                          hor_flip=True,
+                                                          crop_size=args.irn_crop_size,
+                                                          crop_method="random",
+                                                          rescale=(0.5, 1.5)
+                                                          )
+    train_dataset = torchutils.split_dataset(train_dataset, n_gpus)
+    
+    infer_dataset = voc12.dataloader.VOC12ImageDataset(args.infer_list,
+                                                       voc12_root=args.voc12_root,
+                                                       crop_size=args.irn_crop_size,
+                                                       crop_method="top_left")
+    infer_dataset = torchutils.split_dataset(infer_dataset, n_gpus)
+    
+    # dataset = torchutils.split_dataset(dataset, n_gpus)
 
     print('[ ', end='')
-    multiprocessing.spawn(_work, nprocs=n_gpus, args=(dataset, args), join=True)
+    multiprocessing.spawn(_work, nprocs=n_gpus, args=(model, train_dataset, infer_dataset, args), join=True)
     print(']')
 
     torch.cuda.empty_cache()
