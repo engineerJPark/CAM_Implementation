@@ -37,8 +37,8 @@ def _work(process_id, dataset, args):
             valid_cat = torch.nonzero(label)[:, 0] # nonzero label index for all batch
             
             img = PIL.Image.open(os.path.join(args.voc12_root, 'JPEGImages', name_str + '.jpg'))
-            cam_img = np.load(args.origin_cam_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res'] # not args.cam_out_dir
-            keys = np.load(args.origin_cam_dir + '/' + name_str + '.npy', allow_pickle=True).item()['keys'] # not args.cam_out_dir
+            cam_img = np.load(args.cam_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res'] # not args.cam_out_dir
+            keys = np.load(args.cam_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['keys'] # not args.cam_out_dir
             keys = np.pad(keys + 1, (1, 0), mode='constant')
             
             # print(cam_img.shape)

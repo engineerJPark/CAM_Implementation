@@ -37,7 +37,6 @@ if __name__ == '__main__':
     # Output Path
     parser.add_argument("--log_name", default="sample_train_eval", type=str)
     parser.add_argument("--cam_weights_name", default="savefile/pretrained/res50_cam.pth", type=str)
-    parser.add_argument("--cam_save_dir", required=True, type=str) # cam, cam_crf, cam_aff
     parser.add_argument("--cam_out_dir", default="savefile/result/cam", type=str) 
     parser.add_argument("--crf_out_dir", default="savefile/result/cam_crf", type=str) 
     parser.add_argument("--aff_out_dir", default="savefile/result/cam_aff", type=str) 
@@ -83,9 +82,9 @@ if __name__ == '__main__':
         
     if args.make_cam_aff_pass is True:
         import step.make_cam_aff
-    timer = pyutils.Timer('step.make_cam_aff:')
-    step.make_cam_aff.run(args)
-    
+        timer = pyutils.Timer('step.make_cam_aff:')
+        step.make_cam_aff.run(args)
+        
     if args.eval_cam_pass is True:
         import step.eval_cam
         timer = pyutils.Timer('step.eval_cam:')

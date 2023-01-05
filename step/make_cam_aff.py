@@ -48,7 +48,7 @@ def _work(process_id, model, dataset, args):
 
             rw_pred = keys[rw_pred]
 
-            imageio.imsave(os.path.join(args.make_cam_aff_pass, img_name + '.png'), rw_pred.astype(np.uint8))
+            imageio.imsave(os.path.join(args.aff_out_dir, img_name + '.png'), rw_pred.astype(np.uint8))
 
             if process_id == n_gpus - 1 and iter % (len(databin) // 20) == 0:
                 print("%d " % ((5*iter+1)//(len(databin) // 20)), end='')
