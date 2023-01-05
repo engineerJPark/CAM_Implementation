@@ -46,7 +46,8 @@ if __name__ == '__main__':
     parser.add_argument("--eval_cam_pass", default=True)
     parser.add_argument("--draw_cam_pass", default=True)
     parser.add_argument("--make_cam_crf_pass", default=True)
-    # parser.add_argument("--train_cam_aff_pass", default=True)
+    parser.add_argument("--train_cam_aff_pass", default=True) 
+    parser.add_argument("--make_cam_aff_pass", default=True)
 
     args = parser.parse_args()
     args.cam_out_dir = "savefile/result/" + args.cam_save_dir
@@ -65,28 +66,34 @@ if __name__ == '__main__':
         import step.train_cam
         timer = pyutils.Timer('step.train_cam:')
         step.train_cam.run(args)
+        
+    if args.train_cam_aff_pass is True:
+        import step.train_cam_aff
+        timer = pyutils.Timer('step.train_cam_aff:')
+        step.train_cam_aff.run(args)
 
     if args.make_cam_pass is True:
         import step.make_cam
         timer = pyutils.Timer('step.make_cam:')
         step.make_cam.run(args)
-
-    if args.eval_cam_pass is True:
-        import step.eval_cam
-        timer = pyutils.Timer('step.eval_cam:')
-        step.eval_cam.run(args)
         
     if args.make_cam_crf_pass is True:
         import step.make_cam_crf
         timer = pyutils.Timer('step.make_cam_crf:')
         step.make_cam_crf.run(args)
+        
+    if args.make_cam_aff_pass is True:
+        import step.make_cam_aff
+    timer = pyutils.Timer('step.make_cam_aff:')
+    step.make_cam_aff.run(args)
+    
+    if args.eval_cam_pass is True:
+        import step.eval_cam
+        timer = pyutils.Timer('step.eval_cam:')
+        step.eval_cam.run(args)
 
     if args.draw_cam_pass is True:
         import step.draw_cam
         timer = pyutils.Timer('step.draw_cam:')
         step.draw_cam.run(args)
         
-    # if args.train_cam_aff_pass is True:
-    #     import step.train_cam_aff
-    #     timer = pyutils.Timer('step.train_cam_aff:')
-    #     step.train_cam_aff.run(args)
