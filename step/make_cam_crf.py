@@ -52,7 +52,7 @@ def _work(process_id, dataset, args):
             cam_img_crf = crf_inference_label(np.asarray(img), cam_img, t=10, n_labels=keys.shape[0])
             
             # save cams
-            np.save(os.path.join(args.cam_out_dir, name_str + '.npy'),
+            np.save(os.path.join(args.crf_out_dir, name_str + '.npy'),
                     {"keys": valid_cat, "high_res": cam_img_crf})
 
             if process_id == n_gpus - 1 and iter % (len(databin) // 20) == 0:

@@ -44,6 +44,7 @@ def _work(process_id, dataset, args):
             
             # save cam image
             if args.make_cam_pass is True:
+                os.makedirs(args.cam_out_dir + "_on_img", exist_ok=True)
                 cam_img_pil = []
                 for channel_idx in range(cam_img.shape[0]): # cam img for each class + coloring
                     cam_img_pil.append(PIL.Image.fromarray(np.uint8(cm.jet(cam_img[channel_idx,:,:]) * 255)))
@@ -55,6 +56,7 @@ def _work(process_id, dataset, args):
                 
             # save crf image
             if args.make_cam_crf_pass is True:
+                os.makedirs(args.crf_out_dir + "_on_img", exist_ok=True)
                 crf_img_pil = []
                 for channel_idx in range(crf_img.shape[0]): # cam img for each class + coloring
                     crf_img_pil.append(PIL.Image.fromarray(np.uint8(cm.jet(crf_img[channel_idx,:,:]) * 255)))
@@ -66,6 +68,7 @@ def _work(process_id, dataset, args):
                 
             # save aff image
             if args.make_cam_aff_pass is True:
+                os.makedirs(args.aff_out_dir + "_on_img", exist_ok=True)
                 aff_img_pil = []
                 for channel_idx in range(aff_img.shape[0]): # cam img for each class + coloring
                     aff_img_pil.append(PIL.Image.fromarray(np.uint8(cm.jet(aff_img[channel_idx,:,:]) * 255)))

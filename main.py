@@ -52,16 +52,11 @@ if __name__ == '__main__':
     parser.add_argument("--make_cam_aff_pass", default=True)
 
     args = parser.parse_args()
-    args.cam_out_dir = args.cam_out_dir + "crf"
-    args.cam_out_dir = args.cam_out_dir + "aff"
-    
-    args.cam_on_img_dir = args.cam_out_dir 
 
     os.makedirs("savefile", exist_ok=True)
     os.makedirs("savefile/result", exist_ok=True)
     os.makedirs("savefile/pretrained", exist_ok=True)
     os.makedirs(args.cam_out_dir, exist_ok=True)
-    os.makedirs(args.cam_on_img_dir, exist_ok=True)
 
     pyutils.Logger(args.log_name + '.log')
     print(vars(args))
