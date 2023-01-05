@@ -29,6 +29,10 @@ def _work(process_id, dataset, args):
     databin = dataset[process_id]
     n_gpus = torch.cuda.device_count()
     data_loader = DataLoader(databin, shuffle=False, num_workers=args.num_workers // n_gpus, pin_memory=False)
+    
+    os.makedirs(args.cam_out_dir + "_on_img", exist_ok=True)
+    os.makedirs(args.crf_out_dir + "_on_img", exist_ok=True)
+    os.makedirs(args.aff_out_dir + "_on_img", exist_ok=True)
 
     with torch.no_grad(), cuda.device(process_id):
         for iter, pack in enumerate(data_loader):
@@ -38,13 +42,10 @@ def _work(process_id, dataset, args):
             valid_cat = torch.nonzero(label)[:, 0] # nonzero label index for all batch
             
             img = PIL.Image.open(os.path.join(args.voc12_root, 'JPEGImages', name_str + '.jpg'))
-            cam_img = np.load(args.cam_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res']
-            crf_img = np.load(args.crf_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res']
-            aff_img = np.load(args.aff_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res']
             
             # save cam image
             if args.make_cam_pass is True:
-                os.makedirs(args.cam_out_dir + "_on_img", exist_ok=True)
+                cam_img = np.load(args.cam_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res']
                 cam_img_pil = []
                 for channel_idx in range(cam_img.shape[0]): # cam img for each class + coloring
                     cam_img_pil.append(PIL.Image.fromarray(np.uint8(cm.jet(cam_img[channel_idx,:,:]) * 255)))
@@ -56,7 +57,7 @@ def _work(process_id, dataset, args):
                 
             # save crf image
             if args.make_cam_crf_pass is True:
-                os.makedirs(args.crf_out_dir + "_on_img", exist_ok=True)
+                crf_img = np.load(args.crf_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res']
                 crf_img_pil = []
                 for channel_idx in range(crf_img.shape[0]): # cam img for each class + coloring
                     crf_img_pil.append(PIL.Image.fromarray(np.uint8(cm.jet(crf_img[channel_idx,:,:]) * 255)))
@@ -68,7 +69,7 @@ def _work(process_id, dataset, args):
                 
             # save aff image
             if args.make_cam_aff_pass is True:
-                os.makedirs(args.aff_out_dir + "_on_img", exist_ok=True)
+                aff_img = np.load(args.aff_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res']
                 aff_img_pil = []
                 for channel_idx in range(aff_img.shape[0]): # cam img for each class + coloring
                     aff_img_pil.append(PIL.Image.fromarray(np.uint8(cm.jet(aff_img[channel_idx,:,:]) * 255)))
