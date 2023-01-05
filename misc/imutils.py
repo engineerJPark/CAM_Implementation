@@ -166,13 +166,13 @@ def crf_inference_label(img, labels, t=10, n_labels=21, gt_prob=0.7):
 
     d.setUnaryEnergy(unary)
     d.addPairwiseGaussian(sxy=3, compat=3)
-    d.addPairwiseBilateral(sxy=80, srgb=5, rgbim=np.ascontiguousarray(np.copy(img)), compat=10)
+    d.addPairwiseBilateral(sxy=50, srgb=5, rgbim=np.ascontiguousarray(np.copy(img)), compat=10)
 
     q = d.inference(t)
 
     return np.argmax(np.array(q).reshape((n_labels, h, w)), axis=0)
 
-def crf_inference_softmax(img, probs, t=10, scale_factor=1, n_labels=21):
+def crf_inference_softmax(img, probs, t=10, n_labels=21):
     '''
     CRF by probability CAM
     input image is numpy, dimension HWC
@@ -185,8 +185,8 @@ def crf_inference_softmax(img, probs, t=10, scale_factor=1, n_labels=21):
     unary = np.ascontiguousarray(unary)
 
     d.setUnaryEnergy(unary)
-    d.addPairwiseGaussian(sxy=3/scale_factor, compat=3)
-    d.addPairwiseBilateral(sxy=80/scale_factor, srgb=13, rgbim=np.copy(img), compat=10)
+    d.addPairwiseGaussian(sxy=3, compat=3)
+    d.addPairwiseBilateral(sxy=50, srgb=13, rgbim=np.copy(img), compat=10)
     Q = d.inference(t)
 
     return np.array(Q).reshape((n_labels, h, w))
