@@ -44,7 +44,7 @@ if __name__ == '__main__':
     parser.add_argument("--ir_label_out_dir", default="result/ir_label", type=str) # affinity 
 
     # Inter-pixel Relation Network (IRNet)
-    parser.add_argument("--irn_network", default="net.resnet50_irn", type=str)
+    parser.add_argument("--irn_network", default="net.resnet50_aff", type=str)
     parser.add_argument("--irn_crop_size", default=512, type=int)
     parser.add_argument("--irn_batch_size", default=32, type=int)
     parser.add_argument("--irn_num_epoches", default=3, type=int)
@@ -58,10 +58,6 @@ if __name__ == '__main__':
                              "The random walk is performed 2^{exp_times}.")
     parser.add_argument("--ins_seg_bg_thres", default=0.25)
     parser.add_argument("--sem_seg_bg_thres", default=0.25)
-    
-    # Mining Inter-pixel Relations
-    parser.add_argument("--conf_fg_thres", default=0.30, type=float)
-    parser.add_argument("--conf_bg_thres", default=0.05, type=float)
 
     # Step
     parser.add_argument("--train_cam_pass", default=True)
@@ -69,6 +65,7 @@ if __name__ == '__main__':
     parser.add_argument("--eval_cam_pass", default=True)
     parser.add_argument("--draw_cam_pass", default=True)
     parser.add_argument("--make_cam_crf_pass", default=True)
+    parser.add_argument("--cam_to_ir_label_pass", default=True)
     parser.add_argument("--train_cam_aff_pass", default=True) 
     parser.add_argument("--make_cam_aff_pass", default=True)
     
@@ -87,6 +84,11 @@ if __name__ == '__main__':
         import step.train_cam
         timer = pyutils.Timer('step.train_cam:')
         step.train_cam.run(args)
+        
+    if args.cam_to_ir_label_pass is True:
+        import step.cam_to_ir_label
+        timer = pyutils.Timer('step.cam_to_ir_label:')
+        step.cam_to_ir_label.run(args)
         
     if args.train_cam_aff_pass is True:
         import step.train_cam_aff
