@@ -39,24 +39,24 @@ def _work(process_id, dataset, args):
             img = PIL.Image.open(os.path.join(args.voc12_root, 'JPEGImages', name_str + '.jpg'))
             cam_img = np.load(args.origin_cam_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res'] # not args.cam_out_dir
             keys = np.load(args.origin_cam_dir + '/' + name_str + '.npy', allow_pickle=True).item()['keys'] # not args.cam_out_dir
+            keys = np.pad(keys + 1, (1, 0), mode='constant')
             
             # print(cam_img.shape)
             # print(np.argmax(cam_img, axis=0))
             # print(np.argmax(cam_img, axis=0).shape)
-            
-            print(keys)
-            print(keys.shape)
+            # print(keys)
+            # print(keys.shape)
             
             # # do densecrf to CAM 
-            # cam_img = np.argmax(cam_img, axis=0)
-            # cam_img_crf = crf_inference_label(np.asarray(img), cam_img, t=10, n_labels=keys.shape[0])
+            cam_img = np.argmax(cam_img, axis=0)
+            cam_img_crf = crf_inference_label(np.asarray(img), cam_img, t=10, n_labels=keys.shape[0])
             
-            # # save cams
-            # np.save(os.path.join(args.cam_out_dir, name_str + '.npy'),
-            #         {"keys": valid_cat, "high_res": cam_img_crf})
+            # save cams
+            np.save(os.path.join(args.cam_out_dir, name_str + '.npy'),
+                    {"keys": valid_cat, "high_res": cam_img_crf})
 
-            # if process_id == n_gpus - 1 and iter % (len(databin) // 20) == 0:
-            #     print("%d " % ((5*iter+1)//(len(databin) // 20)), end='')
+            if process_id == n_gpus - 1 and iter % (len(databin) // 20) == 0:
+                print("%d " % ((5*iter+1)//(len(databin) // 20)), end='')
             
             
 def run(args):
