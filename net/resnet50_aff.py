@@ -112,7 +112,8 @@ class Net(nn.Module):
         x3 = self.stage3(x2).detach()
         x4 = self.stage4(x3).detach()
         x5 = self.stage5(x4).detach()
-
+        
+        # multi dimensional feature
         edge1 = self.fc_edge1(x1)
         edge2 = self.fc_edge2(x2)
         edge3 = self.fc_edge3(x3)[..., :edge2.size(2), :edge2.size(3)]
@@ -120,6 +121,7 @@ class Net(nn.Module):
         edge5 = self.fc_edge5(x5)[..., :edge2.size(2), :edge2.size(3)]
         edge_out = self.fc_edge6(torch.cat([edge1, edge2, edge3, edge4, edge5], dim=1))
 
+        # multi dimensional feature
         dp1 = self.fc_dp1(x1)
         dp2 = self.fc_dp2(x2)
         dp3 = self.fc_dp3(x3)

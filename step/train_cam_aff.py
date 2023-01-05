@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 from torch.backends import cudnn
 cudnn.enabled = True
 from torch.utils.data import DataLoader
@@ -8,10 +9,16 @@ import importlib
 
 def run(args):
 
+
     path_index = indexing.PathIndex(radius=10, default_size=(args.irn_crop_size // 4, args.irn_crop_size // 4))
 
     model = getattr(importlib.import_module(args.irn_network), 'AffinityDisplacementLoss')(
         path_index)
+    
+    if torch.cuda.device_count() > 1:
+        print("Let's use", torch.cuda.device_count(), "GPUs!") # dim = 0 [30, xxx] -> [10, ...], [10, ...], [10, ...] on 3 GPUs
+        model = nn.DataParallel(model)
+    model.cuda()
 
     train_dataset = voc12.dataloader.VOC12AffinityDataset(args.train_list,
                                                           label_dir=args.ir_label_out_dir,
@@ -107,4 +114,17 @@ def run(args):
     print('done.')
 
     torch.save(model.module.state_dict(), args.irn_weights_name)
+    torch.cuda.empty_cache()
+
+def run(args):
+    n_gpus = torch.cuda.device_count()
+
+    dataset = voc12.dataloader.VOC12ClassificationDatasetMSF(args.train_list,
+                                                             voc12_root=args.voc12_root, scales=args.cam_scales)
+    dataset = torchutils.split_dataset(dataset, n_gpus)
+
+    print('[ ', end='')
+    multiprocessing.spawn(_work, nprocs=n_gpus, args=(dataset, args), join=True)
+    print(']')
+
     torch.cuda.empty_cache()

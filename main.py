@@ -40,8 +40,8 @@ if __name__ == '__main__':
     parser.add_argument("--cam_out_dir", default="savefile/result/cam", type=str) 
     parser.add_argument("--crf_out_dir", default="savefile/result/cam_crf", type=str) 
     parser.add_argument("--aff_out_dir", default="savefile/result/cam_aff", type=str) 
-    parser.add_argument("--irn_weights_name", default="sess/res50_irn.pth", type=str) # affinity 
-    parser.add_argument("--ir_label_out_dir", default="result/ir_label", type=str) # affinity 
+    parser.add_argument("--irn_weights_name", default="savefile/result/pretrained/res50_irn.pth", type=str) # affinity 
+    parser.add_argument("--ir_label_out_dir", default="savefile/result/ir_label", type=str) # affinity 
 
     # Inter-pixel Relation Network (IRNet)
     parser.add_argument("--irn_network", default="net.resnet50_aff", type=str)

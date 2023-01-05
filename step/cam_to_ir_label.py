@@ -13,7 +13,8 @@ def _work(process_id, infer_dataset, args):
 
     databin = infer_dataset[process_id]
     infer_data_loader = DataLoader(databin, shuffle=False, num_workers=0, pin_memory=False)
-
+    os.makedirs(args.ir_label_out_dir, exist_ok=True)
+    
     for iter, pack in enumerate(infer_data_loader):
         img_name = voc12.dataloader.decode_int_filename(pack['name'][0])
         img = pack['img'][0].numpy()

@@ -30,7 +30,7 @@ def run(args):
     print({'iou': iou, 'miou': np.nanmean(iou)})
 
     ### in crf
-    print("cam after crf"))
+    print("cam after crf")
     preds = []
     for id in dataset.ids:
         cam_dict = np.load(os.path.join(args.crf_out_dir, id + '.npy'), allow_pickle=True).item()
@@ -52,7 +52,7 @@ def run(args):
     print({'iou': iou, 'miou': np.nanmean(iou)})
 
     ### in aff
-    print("cam after affinitynet"))
+    print("cam after affinitynet")
     preds = []
     for id in dataset.ids:
         cam_dict = np.load(os.path.join(args.aff_out_dir, id + '.npy'), allow_pickle=True).item()
