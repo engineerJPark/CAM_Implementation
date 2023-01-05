@@ -39,16 +39,41 @@ def _work(process_id, dataset, args):
             
             img = PIL.Image.open(os.path.join(args.voc12_root, 'JPEGImages', name_str + '.jpg'))
             cam_img = np.load(args.cam_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res']
+            crf_img = np.load(args.crf_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res']
+            aff_img = np.load(args.aff_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res']
             
             # save cam image
-            cam_img_pil = []
-            for channel_idx in range(cam_img.shape[0]): # cam img for each class + coloring
-                cam_img_pil.append(PIL.Image.fromarray(np.uint8(cm.jet(cam_img[channel_idx,:,:]) * 255)))
-            for channel_idx in range(cam_img.shape[0]): # superpose on image
-                plt.imshow(img, alpha = 0.4)
-                plt.imshow(cam_img_pil[channel_idx], alpha = 0.4)
-                plt.savefig(args.cam_on_img_dir + '/cam_%s_%s.png' % (name_str, CAT_LIST[valid_cat[channel_idx]]))
-                plt.clf()
+            if args.make_cam_pass is True:
+                cam_img_pil = []
+                for channel_idx in range(cam_img.shape[0]): # cam img for each class + coloring
+                    cam_img_pil.append(PIL.Image.fromarray(np.uint8(cm.jet(cam_img[channel_idx,:,:]) * 255)))
+                for channel_idx in range(cam_img.shape[0]): # superpose on image
+                    plt.imshow(img, alpha = 0.4)
+                    plt.imshow(cam_img_pil[channel_idx], alpha = 0.4)
+                    plt.savefig(args.cam_out_dir + "_on_img" + '/cam_%s_%s.png' % (name_str, CAT_LIST[valid_cat[channel_idx]]))
+                    plt.clf()
+                
+            # save crf image
+            if args.make_cam_crf_pass is True:
+                crf_img_pil = []
+                for channel_idx in range(crf_img.shape[0]): # cam img for each class + coloring
+                    crf_img_pil.append(PIL.Image.fromarray(np.uint8(cm.jet(crf_img[channel_idx,:,:]) * 255)))
+                for channel_idx in range(crf_img.shape[0]): # superpose on image
+                    plt.imshow(img, alpha = 0.4)
+                    plt.imshow(crf_img_pil[channel_idx], alpha = 0.4)
+                    plt.savefig(args.crf_out_dir + "_on_img" + '/cam_%s_%s.png' % (name_str, CAT_LIST[valid_cat[channel_idx]]))
+                    plt.clf()
+                
+            # save aff image
+            if args.make_cam_aff_pass is True:
+                aff_img_pil = []
+                for channel_idx in range(aff_img.shape[0]): # cam img for each class + coloring
+                    aff_img_pil.append(PIL.Image.fromarray(np.uint8(cm.jet(aff_img[channel_idx,:,:]) * 255)))
+                for channel_idx in range(aff_img.shape[0]): # superpose on image
+                    plt.imshow(img, alpha = 0.4)
+                    plt.imshow(aff_img_pil[channel_idx], alpha = 0.4)
+                    plt.savefig(args.aff_out_dir + "_on_img" + '/cam_%s_%s.png' % (name_str, CAT_LIST[valid_cat[channel_idx]]))
+                    plt.clf()
 
             if process_id == n_gpus - 1 and iter % (len(databin) // 20) == 0:
                 print("%d " % ((5*iter+1)//(len(databin) // 20)), end='')
