@@ -34,7 +34,13 @@ def _work(process_id, model, dataset, args):
             cam_dict = np.load(args.cam_out_dir + '/' + img_name + '.npy', allow_pickle=True).item()
 
             cams = cam_dict['cam']
-            keys = np.pad(cam_dict['keys'] + 1, (1, 0), mode='constant')
+            
+            # print(cams.shape) ###
+            # print(np.unique(cams)) ### 
+            
+            keys = np.pad(cam_dict['keys'] + 1, (1, 0), mode='constant') # homepage class number
+            
+            # print(np.unique(keys)) ###
 
             cam_downsized_values = cams.cuda()
 
@@ -45,10 +51,17 @@ def _work(process_id, model, dataset, args):
 
             rw_up_bg = F.pad(rw_up, (0, 0, 0, 0, 1, 0), value=args.sem_seg_bg_thres)
             rw_pred = torch.argmax(rw_up_bg, dim=0).cpu().numpy()
+            
+            # print(rw_pred.shape) ###
+            # print(np.unique(rw_pred)) ###
+            
+            rw_pred = keys[rw_pred] # HW dim
+            
+            # print(rw_pred.shape) ###
+            # print(np.unique(rw_pred)) ###
 
-            rw_pred = keys[rw_pred]
-
-            imageio.imsave(os.path.join(args.aff_out_dir, img_name + '.png'), rw_pred.astype(np.uint8))
+            np.save(os.path.join(args.aff_out_dir, img_name + '.npy'), {"keys": keys[1:], "high_res": rw_pred})
+            # imageio.imsave(os.path.join(args.aff_out_dir, img_name + '.png'), rw_pred.astype(np.uint8))
 
             if process_id == n_gpus - 1 and iter % (len(databin) // 20) == 0:
                 print("%d " % ((5*iter+1)//(len(databin) // 20)), end='')

@@ -36,21 +36,16 @@ def _work(process_id, dataset, args):
             label = pack['label'][0] # one hot encoded
             valid_cat = torch.nonzero(label)[:, 0] # nonzero label index for all batch
             
-            img = PIL.Image.open(os.path.join(args.voc12_root, 'JPEGImages', name_str + '.jpg'))
-            cam_img = np.load(args.cam_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res'] # not args.cam_out_dir
-            cam_img[cam_img < args.conf_fg_thres] = 0.0
-            
-            
+            img = PIL.Image.open(os.path.join(args.voc12_root, 'JPEGImages', name_str + '.jpg')) # HWC
+            cam_img = np.load(args.cam_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res'] # CHW
             keys = np.load(args.cam_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['keys'] # not args.cam_out_dir
             keys = np.pad(keys + 1, (1, 0), mode='constant')
-            
+
+            # print(np.asarray(img).shape)
             # print(cam_img.shape)
-            # print(np.argmax(cam_img, axis=0))
-            # print(np.argmax(cam_img, axis=0).shape)
-            # print(keys)
-            # print(keys.shape)
             
             # # do densecrf to CAM 
+            cam_img = np.pad(cam_img, ((1, 0), (0, 0), (0, 0)), mode='constant', constant_values=args.conf_fg_thres)
             cam_img = np.argmax(cam_img, axis=0)
             cam_img_crf = crf_inference_label(np.asarray(img), cam_img, t=10, n_labels=keys.shape[0])
             

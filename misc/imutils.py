@@ -166,8 +166,9 @@ def crf_inference_label(img, labels, t=10, n_labels=21, gt_prob=0.7):
 
     d.setUnaryEnergy(unary)
     d.addPairwiseGaussian(sxy=3, compat=3)
-    d.addPairwiseBilateral(sxy=50, srgb=5, rgbim=np.ascontiguousarray(np.copy(img)), compat=10)
-
+    d.addPairwiseBilateral(sxy=80, srgb=13, rgbim=np.ascontiguousarray(np.copy(img)), compat=10)
+    # d.addPairwiseBilateral(sxy=50, srgb=5, rgbim=np.ascontiguousarray(np.copy(img)), compat=10)
+    
     q = d.inference(t)
 
     return np.argmax(np.array(q).reshape((n_labels, h, w)), axis=0)

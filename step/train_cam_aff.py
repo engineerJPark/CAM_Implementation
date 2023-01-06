@@ -2,13 +2,13 @@ import torch
 import torch.nn as nn
 from torch.backends import cudnn
 cudnn.enabled = True
-import multiprocessing
+from torch import multiprocessing
 from torch.utils.data import DataLoader
 import voc12.dataloader
 from misc import pyutils, torchutils, indexing
 import importlib
 
-def _work(model, train_dataset, infer_dataset, args):
+def _work(process_id, model, train_dataset, infer_dataset, args):
 
 
     # path_index = indexing.PathIndex(radius=10, default_size=(args.irn_crop_size // 4, args.irn_crop_size // 4))

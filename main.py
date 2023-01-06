@@ -14,7 +14,7 @@ if __name__ == '__main__':
     # Dataset
     parser.add_argument("--train_list", default="voc12/train_aug.txt", type=str)
     parser.add_argument("--val_list", default="voc12/val.txt", type=str)
-    parser.add_argument("--infer_list", default="voc12/train.txt", type=str,
+    parser.add_argument("--infer_list", default="voc12/train_aug.txt", type=str,
                         help="voc12/train_aug.txt to train a fully supervised model, "
                              "voc12/train.txt or voc12/val.txt to quickly check the quality of the labels.")
     parser.add_argument("--chainer_eval_set", default="train", type=str)
@@ -40,7 +40,7 @@ if __name__ == '__main__':
     parser.add_argument("--cam_out_dir", default="savefile/result/cam", type=str) 
     parser.add_argument("--crf_out_dir", default="savefile/result/cam_crf", type=str) 
     parser.add_argument("--aff_out_dir", default="savefile/result/cam_aff", type=str) 
-    parser.add_argument("--irn_weights_name", default="savefile/result/pretrained/res50_irn.pth", type=str) # affinity 
+    parser.add_argument("--irn_weights_name", default="savefile/pretrained/res50_irn.pth", type=str) # affinity 
     parser.add_argument("--ir_label_out_dir", default="savefile/result/ir_label", type=str) # affinity 
 
     # Inter-pixel Relation Network (IRNet)
