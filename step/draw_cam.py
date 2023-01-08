@@ -39,14 +39,14 @@ def _work(process_id, dataset, args):
             # load cam npy
             name_str = pack['name'][0]
             label = pack['label'][0] # one hot encoded
-            valid_cat = torch.nonzero(label)[:, 0] # nonzero label index for all batch. codepage class number
+            valid_cat = torch.nonzero(label)[:, 0] # nonzero label index for all batch. coded class number
             
             img = PIL.Image.open(os.path.join(args.voc12_root, 'JPEGImages', name_str + '.jpg'))
             
             # save cam image
             draw_cam = False
-            draw_crf = False
-            draw_aff = True
+            draw_crf = True
+            draw_aff = False
             
             if draw_cam is True:
                 cam_img = np.load(args.cam_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res']
@@ -58,38 +58,50 @@ def _work(process_id, dataset, args):
                     plt.imshow(cam_img_pil[channel_idx], alpha = 0.4)
                     plt.savefig(args.cam_out_dir + "_on_img" + '/cam_%s_%s.png' % (name_str, CAT_LIST[valid_cat[channel_idx]]))
                     plt.clf()
-                
+            
+            # i = 0
             # save crf image
             if draw_crf is True: # crf CAM is 2 dimensional, by argument
-                crf_ = np.load(args.crf_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res']
-                crf_img = np.zeros((np.max(crf_), crf_.shape[0], crf_.shape[1])) ### 0, 1, 2
+                crf_ = np.load(args.crf_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res'] # HW dimension, saved a key indices
+                crf_img = np.zeros((np.unique(crf_).shape[0], crf_.shape[0], crf_.shape[1])) ### According to the given key value
+                # crf_img = np.zeros((np.max(crf_), crf_.shape[0], crf_.shape[1])) ### According to the given key value
                 
-                for idx in range(1, np.max(crf_)+1):
-                    crf_img[idx-1][crf_ == idx] = 1
+                # print(crf_.shape)
+                # print(np.unique(crf_))
+                # i += 1
+                # if i > 100 : 
+                #     exit()
+                
+                for idx in range(1, crf_img.shape[0] + 1): 
+                    crf_img[idx-1][crf_ == np.unique(crf_)[idx]] = 1 # set to binary label image
+                    
+                # for idx in range(1, np.unique(crf_).shape[0]): # [0 2]인 경우 1을 잡는 곳에 표시 안하고 1을 잡는 곳에 표시를 할 염려가 있음
+                #     crf_img[idx-1][crf_ == np.unique(crf_)[idx]] = 1 # set to binary label image
+                    
 
                 crf_img_pil = []
                 for channel_idx in range(crf_img.shape[0]): # cam img for each class + coloring
                     crf_img_pil.append(PIL.Image.fromarray(np.uint8(cm.jet(crf_img[channel_idx, ...]) * 255)))
                 for channel_idx in range(crf_img.shape[0]): # superpose on image
                     plt.imshow(img, alpha = 0.4)
-                    plt.imshow(crf_img_pil[channel_idx, ...], alpha = 0.4)
+                    plt.imshow(crf_img_pil[channel_idx], alpha = 0.4)
                     plt.savefig(args.crf_out_dir + "_on_img" + '/cam_%s_%s.png' % (name_str, CAT_LIST[valid_cat[channel_idx]]))
                     plt.clf()
-                
+
             # save aff image
             if draw_aff is True: # aff CAM is 2 dimensional, by class number 
-                aff_ = np.load(args.aff_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res']
-                aff_img = np.zeros((np.unique(aff_).shape[0] - 1, aff_.shape[0], aff_.shape[1])) # 0, ??, ??
+                aff_ = np.load(args.aff_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res'] # HW dim, 0 is bg, class num is already inside the image
+                aff_img = np.zeros((np.unique(aff_).shape[0] - 1, aff_.shape[0], aff_.shape[1])) # 0, class numbers ... 
                 
-                for idx in range(1, aff_img.shape[0] + 1):
-                    aff_img[idx-1][aff_ == np.unique(aff_)[idx]] = 1
+                for idx in range(1, aff_img.shape[0] + 1): 
+                    aff_img[idx-1][aff_ == np.unique(aff_)[idx]] = 1 # delete background
                 
                 aff_img_pil = []
                 for channel_idx in range(aff_img.shape[0]): # cam img for each class + coloring
                     aff_img_pil.append(PIL.Image.fromarray(np.uint8(cm.jet(aff_img[channel_idx, ...]) * 255)))
                 for channel_idx in range(aff_img.shape[0]): # superpose on image
                     plt.imshow(img, alpha = 0.4)
-                    plt.imshow(aff_img_pil[channel_idx, ...], alpha = 0.4)
+                    plt.imshow(aff_img_pil[channel_idx], alpha = 0.4)
                     plt.savefig(args.aff_out_dir + "_on_img" + '/cam_%s_%s.png' % (name_str, CAT_LIST[valid_cat[channel_idx]]))
                     plt.clf()
 

@@ -31,7 +31,7 @@ if __name__ == '__main__':
                         help="Multi-scale inferences")
 
     # Mining Inter-pixel Relations
-    parser.add_argument("--conf_fg_thres", default=0.30, type=float)
+    parser.add_argument("--conf_fg_thres", default=0.20, type=float) # 0.30
     parser.add_argument("--conf_bg_thres", default=0.05, type=float)
 
     # Output Path
@@ -57,7 +57,7 @@ if __name__ == '__main__':
                         help="Hyper-parameter that controls the number of random walk iterations,"
                              "The random walk is performed 2^{exp_times}.")
     parser.add_argument("--ins_seg_bg_thres", default=0.25)
-    parser.add_argument("--sem_seg_bg_thres", default=0.25)
+    parser.add_argument("--sem_seg_bg_thres", default=0.30) # 0.25
 
     # Step
     parser.add_argument("--train_cam_pass", default=True)

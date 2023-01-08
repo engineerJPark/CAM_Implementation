@@ -50,12 +50,12 @@ def _work(process_id, model, dataset, args):
             rw_up = rw_up / torch.max(rw_up)
 
             rw_up_bg = F.pad(rw_up, (0, 0, 0, 0, 1, 0), value=args.sem_seg_bg_thres)
-            rw_pred = torch.argmax(rw_up_bg, dim=0).cpu().numpy()
+            rw_pred = torch.argmax(rw_up_bg, dim=0).cpu().numpy() # 0 bg, homepage class num is fg
             
             # print(rw_pred.shape) ###
             # print(np.unique(rw_pred)) ###
             
-            rw_pred = keys[rw_pred] # HW dim
+            rw_pred = keys[rw_pred] # HW dim, 0 bg, homepage class num is fg
             
             # print(rw_pred.shape) ###
             # print(np.unique(rw_pred)) ###

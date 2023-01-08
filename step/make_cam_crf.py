@@ -39,15 +39,16 @@ def _work(process_id, dataset, args):
             img = PIL.Image.open(os.path.join(args.voc12_root, 'JPEGImages', name_str + '.jpg')) # HWC
             cam_img = np.load(args.cam_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res'] # CHW
             keys = np.load(args.cam_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['keys'] # not args.cam_out_dir
-            keys = np.pad(keys + 1, (1, 0), mode='constant')
+            keys = np.pad(keys + 1, (1, 0), mode='constant') # homepage class number
 
             # print(np.asarray(img).shape)
             # print(cam_img.shape)
             
             # # do densecrf to CAM 
             cam_img = np.pad(cam_img, ((1, 0), (0, 0), (0, 0)), mode='constant', constant_values=args.conf_fg_thres)
-            cam_img = np.argmax(cam_img, axis=0)
-            cam_img_crf = crf_inference_label(np.asarray(img), cam_img, t=10, n_labels=keys.shape[0])
+            cam_img = np.argmax(cam_img, axis=0) # 0 bg, homepage class num is fg, HW dimension
+            cam_img_crf = crf_inference_label(np.asarray(img), cam_img, t=10, n_labels=keys.shape[0]) # HW dimension, set 0, 1, 2, ... as homepage class number
+            cam_img_crf = keys[cam_img_crf] # 0 bg, homepage class num as fg
             
             # save cams
             np.save(os.path.join(args.crf_out_dir, name_str + '.npy'),
