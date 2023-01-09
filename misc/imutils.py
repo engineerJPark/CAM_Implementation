@@ -205,16 +205,18 @@ def _crf_with_alpha(image, cam_list, keys, alpha=32, t=10):
     bgcam_score = np.concatenate((bg_score, v), axis=0)
     crf_score = crf_inference_softmax(image, bgcam_score, n_labels=bgcam_score.shape[0], t=t) # input HWC, output CHW
     
+    return crf_score
+    
     # n_crf_al = dict()
     # n_crf_al[0] = crf_score[0] # idx 0 is bg
     # for i, key in enumerate(keys):
     #     n_crf_al[key+1] = crf_score[i+1] # save as homepage class num
     
-    n_crf_al = np.zeros(keys.shape[0], cam_list[-2], cam_list[-1])
-    for i, key in enumerate(keys): # keys ex 0, 1, 14, ... 
-        n_crf_al[i] = crf_score[key]
+    # n_crf_al = np.zeros((keys.shape[0], cam_list.shape[-2], cam_list.shape[-1]))
+    # for i, key in enumerate(keys): # keys ex 0, 1, 14, ... 
+    #     n_crf_al[i] = crf_score[key]
     
-    return n_crf_al
+    # return n_crf_al
 
 
 def get_strided_size(orig_size, stride):
