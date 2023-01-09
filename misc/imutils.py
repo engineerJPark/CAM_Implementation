@@ -153,6 +153,7 @@ def center_crop(img, cropsize, default_value=0):
 def HWC_to_CHW(img):
     return np.transpose(img, (2, 0, 1))
 
+
 def crf_inference_label(img, labels, t=10, n_labels=21, gt_prob=0.7):
     '''
     CRF by label of CAM
@@ -170,12 +171,13 @@ def crf_inference_label(img, labels, t=10, n_labels=21, gt_prob=0.7):
     
     q = d.inference(t)
 
-    return np.argmax(np.array(q).reshape((n_labels, h, w)), axis=0) # n_labels, h, w
+    return np.argmax(np.array(q).reshape((n_labels, h, w)), axis=0) # h, w
 
 def crf_inference_softmax(img, probs, t=10, n_labels=21):
     '''
     CRF by probability CAM
     input image is numpy, dimension HWC
+    input prob is numpy, dimension CHW
     '''
     h, w = img.shape[:2]
 
@@ -189,7 +191,30 @@ def crf_inference_softmax(img, probs, t=10, n_labels=21):
     d.addPairwiseBilateral(sxy=50, srgb=13, rgbim=np.copy(img), compat=10)
     Q = d.inference(t)
 
-    return np.array(Q).reshape((n_labels, h, w))
+    return np.array(Q).reshape((n_labels, h, w)) # n_labels, h, w
+
+def _crf_with_alpha(image, cam_list, keys, alpha=32, t=10):
+    '''
+    input image is numpy, dimension HWC
+    input prob is numpy, dimension CHW
+    '''
+    # v = np.array(list(cam_dict.values())) # prob image should be HWC
+    
+    v = cam_list
+    bg_score = np.power(1 - np.max(v, axis=0, keepdims=True), alpha)
+    bgcam_score = np.concatenate((bg_score, v), axis=0)
+    crf_score = crf_inference_softmax(image, bgcam_score, n_labels=bgcam_score.shape[0], t=t) # input HWC, output CHW
+    
+    # n_crf_al = dict()
+    # n_crf_al[0] = crf_score[0] # idx 0 is bg
+    # for i, key in enumerate(keys):
+    #     n_crf_al[key+1] = crf_score[i+1] # save as homepage class num
+    
+    n_crf_al = np.zeros(keys.shape[0], cam_list[-2], cam_list[-1])
+    for i, key in enumerate(keys): # keys ex 0, 1, 14, ... 
+        n_crf_al[i] = crf_score[key]
+    
+    return n_crf_al
 
 
 def get_strided_size(orig_size, stride):

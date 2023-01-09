@@ -30,14 +30,14 @@ def _work(process_id, infer_dataset, args):
         fg_conf = keys[pred]
 
         bg_conf_cam = np.pad(cams, ((1, 0), (0, 0), (0, 0)), mode='constant', constant_values=args.conf_bg_thres)
-        bg_conf_cam = np.argmax(bg_conf_cam, axis=0)
+        bg_conf_cam = np.argmin(bg_conf_cam, axis=0) # bg_conf_cam = np.argmax(bg_conf_cam, axis=0)
         pred = imutils.crf_inference_label(img, bg_conf_cam, n_labels=keys.shape[0])
         bg_conf = keys[pred]
 
         # 2. combine confident fg & bg
         conf = fg_conf.copy()
         conf[fg_conf == 0] = 255
-        conf[bg_conf + fg_conf == 0] = 0
+        conf[bg_conf + fg_conf == 0] = 0 # kill neutral
 
         imageio.imwrite(os.path.join(args.ir_label_out_dir, img_name + '.png'),
                         conf.astype(np.uint8))

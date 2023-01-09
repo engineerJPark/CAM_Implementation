@@ -14,7 +14,7 @@ import os
 
 import voc12.dataloader
 from misc import torchutils
-from misc.imutils import crf_inference_label, crf_inference_softmax
+from misc.imutils import crf_inference_label, crf_inference_softmax, _crf_with_alpha
 
 CAT_LIST = ['aeroplane', 'bicycle', 'bird', 'boat',
         'bottle', 'bus', 'car', 'cat', 'chair',
@@ -36,16 +36,21 @@ def _work(process_id, dataset, args):
             label = pack['label'][0] # one hot encoded
             valid_cat = torch.nonzero(label)[:, 0] # nonzero label index for all batch
             
-            img = PIL.Image.open(os.path.join(args.voc12_root, 'JPEGImages', name_str + '.jpg')) # HWC
+            img = np.asarray(PIL.Image.open(os.path.join(args.voc12_root, 'JPEGImages', name_str + '.jpg'))) # HWC
             cam_img = np.load(args.cam_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res'] # CHW
-            keys = np.load(args.cam_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['keys'] # not args.cam_out_dir
-            keys = np.pad(keys + 1, (1, 0), mode='constant') # homepage class number
+            keys = np.load(args.cam_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['keys']
+            keys = np.pad(keys + 1, (1, 0), mode='constant') # bg 0, class start w 1
+
+            cam_img_crf = _crf_with_alpha(img, cam_img, keys)
+            cam_img_crf[cam_img_crf < args.cam_eval_thres] = 0
+            cam_img_crf = np.argmax(cam_img_crf, axis=0) # 0 bg, homepage class num is fg, HW dimension
+            cam_img_crf = keys[cam_img_crf] # 0 bg, homepage class num as fg
             
             # # do densecrf to CAM 
-            cam_img = np.pad(cam_img, ((1, 0), (0, 0), (0, 0)), mode='constant', constant_values=args.conf_fg_thres)
-            cam_img = np.argmax(cam_img, axis=0) # 0 bg, homepage class num is fg, HW dimension
-            cam_img_crf = crf_inference_label(np.asarray(img), cam_img, t=10, n_labels=keys.shape[0]) # HW dimension, set 0, 1, 2, ... as homepage class number
-            cam_img_crf = keys[cam_img_crf] # 0 bg, homepage class num as fg
+            # cam_img = np.pad(cam_img, ((1, 0), (0, 0), (0, 0)), mode='constant', constant_values=args.cam_eval_thres)
+            # cam_img = np.argmax(cam_img, axis=0) # 0 bg, homepage class num is fg, HW dimension
+            # cam_img_crf = crf_inference_label(np.asarray(img), cam_img, t=10, n_labels=keys.shape[0]) # HW dimension, set 0, 1, 2, ... as homepage class number
+            # cam_img_crf = keys[cam_img_crf] # 0 bg, homepage class num as fg
             
             # save cams
             np.save(os.path.join(args.crf_out_dir, name_str + '.npy'),
@@ -68,3 +73,4 @@ def run(args):
     print(']')
 
     torch.cuda.empty_cache()
+    

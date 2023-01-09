@@ -12,9 +12,9 @@ if __name__ == '__main__':
                         help="Path to VOC 2012 Devkit, must contain ./JPEGImages as subdirectory.")
 
     # Dataset
-    parser.add_argument("--train_list", default="voc12/train_aug.txt", type=str)
+    parser.add_argument("--train_list", default="voc12/train.txt", type=str)
     parser.add_argument("--val_list", default="voc12/val.txt", type=str)
-    parser.add_argument("--infer_list", default="voc12/train_aug.txt", type=str,
+    parser.add_argument("--infer_list", default="voc12/train.txt", type=str,
                         help="voc12/train_aug.txt to train a fully supervised model, "
                              "voc12/train.txt or voc12/val.txt to quickly check the quality of the labels.")
     parser.add_argument("--chainer_eval_set", default="train", type=str)
@@ -31,8 +31,8 @@ if __name__ == '__main__':
                         help="Multi-scale inferences")
 
     # Mining Inter-pixel Relations
-    parser.add_argument("--conf_fg_thres", default=0.35, type=float) # 0.30
-    parser.add_argument("--conf_bg_thres", default=0.10, type=float) # 0.05
+    parser.add_argument("--conf_fg_thres", default=0.30, type=float) # 0.30
+    parser.add_argument("--conf_bg_thres", default=0.05, type=float) # 0.05
 
     # Output Path
     parser.add_argument("--log_name", default="sample_train_eval", type=str)
