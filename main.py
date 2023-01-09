@@ -31,8 +31,8 @@ if __name__ == '__main__':
                         help="Multi-scale inferences")
 
     # Mining Inter-pixel Relations
-    parser.add_argument("--conf_fg_thres", default=0.20, type=float) # 0.30
-    parser.add_argument("--conf_bg_thres", default=0.05, type=float)
+    parser.add_argument("--conf_fg_thres", default=0.35, type=float) # 0.30
+    parser.add_argument("--conf_bg_thres", default=0.10, type=float) # 0.05
 
     # Output Path
     parser.add_argument("--log_name", default="sample_train_eval", type=str)

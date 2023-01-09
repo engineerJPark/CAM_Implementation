@@ -35,12 +35,7 @@ def _work(process_id, model, dataset, args):
 
             cams = cam_dict['cam']
             
-            # print(cams.shape) ###
-            # print(np.unique(cams)) ### 
-            
             keys = np.pad(cam_dict['keys'] + 1, (1, 0), mode='constant') # homepage class number
-            
-            # print(np.unique(keys)) ###
 
             cam_downsized_values = cams.cuda()
 
@@ -49,16 +44,10 @@ def _work(process_id, model, dataset, args):
             rw_up = F.interpolate(rw, scale_factor=4, mode='bilinear', align_corners=False)[..., 0, :orig_img_size[0], :orig_img_size[1]]
             rw_up = rw_up / torch.max(rw_up)
 
-            rw_up_bg = F.pad(rw_up, (0, 0, 0, 0, 1, 0), value=args.sem_seg_bg_thres)
+            rw_up_bg = F.pad(rw_up, (0, 0, 0, 0, 1, 0), value=args.sem_seg_bg_thres) # right for padding in pytorch
             rw_pred = torch.argmax(rw_up_bg, dim=0).cpu().numpy() # 0 bg, homepage class num is fg
             
-            # print(rw_pred.shape) ###
-            # print(np.unique(rw_pred)) ###
-            
             rw_pred = keys[rw_pred] # HW dim, 0 bg, homepage class num is fg
-            
-            # print(rw_pred.shape) ###
-            # print(np.unique(rw_pred)) ###
 
             np.save(os.path.join(args.aff_out_dir, img_name + '.npy'), {"keys": keys[1:], "high_res": rw_pred})
             # imageio.imsave(os.path.join(args.aff_out_dir, img_name + '.png'), rw_pred.astype(np.uint8))

@@ -40,9 +40,6 @@ def _work(process_id, dataset, args):
             cam_img = np.load(args.cam_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res'] # CHW
             keys = np.load(args.cam_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['keys'] # not args.cam_out_dir
             keys = np.pad(keys + 1, (1, 0), mode='constant') # homepage class number
-
-            # print(np.asarray(img).shape)
-            # print(cam_img.shape)
             
             # # do densecrf to CAM 
             cam_img = np.pad(cam_img, ((1, 0), (0, 0), (0, 0)), mode='constant', constant_values=args.conf_fg_thres)
