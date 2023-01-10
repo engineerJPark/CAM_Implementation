@@ -24,6 +24,11 @@ import random
 random.seed(0)
 
 if __name__ == '__main__':
+    if torch.cuda.is_available(): 
+        print("=======Use GPU=======")
+    else:
+        print("=======Only CPU=======")
+        
     parser = argparse.ArgumentParser()
 
     # Environment
