@@ -45,7 +45,7 @@ def _work(process_id, dataset, args):
             
             # save cam image
             draw_cam = False
-            draw_crf = True
+            draw_crf = False
             draw_aff = True
             
             if draw_cam is True:
