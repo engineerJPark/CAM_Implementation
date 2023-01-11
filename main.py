@@ -110,16 +110,6 @@ if __name__ == '__main__':
         timer = pyutils.Timer('step.train_cam:')
         step.train_cam.run(args)
         
-    if args.cam_to_ir_label_pass is True:
-        import step.cam_to_ir_label
-        timer = pyutils.Timer('step.cam_to_ir_label:')
-        step.cam_to_ir_label.run(args)
-        
-    if args.train_cam_aff_pass is True:
-        import step.train_cam_aff
-        timer = pyutils.Timer('step.train_cam_aff:')
-        step.train_cam_aff.run(args)
-
     if args.make_cam_pass is True:
         import step.make_cam
         timer = pyutils.Timer('step.make_cam:')
@@ -130,6 +120,16 @@ if __name__ == '__main__':
         timer = pyutils.Timer('step.make_cam_crf:')
         step.make_cam_crf.run(args)
         
+    if args.cam_to_ir_label_pass is True:
+        import step.cam_to_ir_label
+        timer = pyutils.Timer('step.cam_to_ir_label:')
+        step.cam_to_ir_label.run(args)
+        
+    if args.train_cam_aff_pass is True:
+        import step.train_cam_aff
+        timer = pyutils.Timer('step.train_cam_aff:')
+        step.train_cam_aff.run(args)
+
     if args.make_cam_aff_pass is True:
         import step.make_cam_aff
         timer = pyutils.Timer('step.make_cam_aff:')
