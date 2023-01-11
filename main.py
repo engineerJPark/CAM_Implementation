@@ -48,16 +48,16 @@ if __name__ == '__main__':
     parser.add_argument("--cam_network", default="net.resnet50_cam", type=str)
     parser.add_argument("--cam_crop_size", default=512, type=int)
     parser.add_argument("--cam_batch_size", default=16, type=int)
-    parser.add_argument("--cam_num_epoches", default=5, type=int)
+    parser.add_argument("--cam_num_epoches", default=10, type=int) # 5
     parser.add_argument("--cam_learning_rate", default=0.1, type=float)
     parser.add_argument("--cam_weight_decay", default=1e-4, type=float)
-    parser.add_argument("--cam_eval_thres", default=0.15, type=float)
+    parser.add_argument("--cam_eval_thres", default=0.25, type=float)
     parser.add_argument("--cam_scales", default=(1.0, 0.5, 1.5, 2.0),
                         help="Multi-scale inferences")
 
     # Mining Inter-pixel Relations
-    parser.add_argument("--conf_fg_thres", default=0.30, type=float) # 0.30
-    parser.add_argument("--conf_bg_thres", default=0.05, type=float) # 0.05
+    parser.add_argument("--conf_fg_thres", default=0.45, type=float) # 0.30
+    parser.add_argument("--conf_bg_thres", default=0.15, type=float) # 0.05
 
     # Output Path
     parser.add_argument("--log_name", default="sample_train_eval", type=str)
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     parser.add_argument("--irn_network", default="net.resnet50_aff", type=str)
     parser.add_argument("--irn_crop_size", default=512, type=int)
     parser.add_argument("--irn_batch_size", default=32, type=int)
-    parser.add_argument("--irn_num_epoches", default=3, type=int)
+    parser.add_argument("--irn_num_epoches", default=10, type=int) # 3
     parser.add_argument("--irn_learning_rate", default=0.1, type=float)
     parser.add_argument("--irn_weight_decay", default=1e-4, type=float)
     

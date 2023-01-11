@@ -45,13 +45,7 @@ def _work(process_id, dataset, args):
             cam_img_crf[cam_img_crf < args.cam_eval_thres] = 0
             cam_img_crf = np.argmax(cam_img_crf, axis=0) # 0 bg, homepage class num is fg, HW dimension
             cam_img_crf = keys[cam_img_crf] # 0 bg, homepage class num as fg
-            
-            # # do densecrf to CAM 
-            # cam_img = np.pad(cam_img, ((1, 0), (0, 0), (0, 0)), mode='constant', constant_values=args.cam_eval_thres)
-            # cam_img = np.argmax(cam_img, axis=0) # 0 bg, homepage class num is fg, HW dimension
-            # cam_img_crf = crf_inference_label(np.asarray(img), cam_img, t=10, n_labels=keys.shape[0]) # HW dimension, set 0, 1, 2, ... as homepage class number
-            # cam_img_crf = keys[cam_img_crf] # 0 bg, homepage class num as fg
-            
+
             # save cams
             np.save(os.path.join(args.crf_out_dir, name_str + '.npy'),
                     {"keys": valid_cat, "high_res": cam_img_crf})

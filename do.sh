@@ -1,3 +1,4 @@
+clear
 python main.py \
 # --train_cam_pass=False \
 # --make_cam_pass=False \
