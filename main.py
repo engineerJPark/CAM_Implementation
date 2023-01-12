@@ -3,26 +3,26 @@ import os
 import torch
 from misc import pyutils
 
-# ## random seed fixing
-# ## PyTorch
-# import torch
-# seed = 42
-# torch.manual_seed(seed)
-# torch.cuda.manual_seed(seed)
-# torch.cuda.manual_seed_all(seed) # gpu 1개 이상일 때 
+## random seed fixing
+## PyTorch
+import torch
+seed = 1
+torch.manual_seed(seed)
+torch.cuda.manual_seed(seed)
+torch.cuda.manual_seed_all(seed) # gpu 1개 이상일 때 
 
-# ## Numpy
-# import numpy as np
-# np.random.seed(seed)
+## Numpy
+import numpy as np
+np.random.seed(seed)
 
-# ## CuDNN
-# import torch.backends.cudnn as cudnn
-# cudnn.benchmark = False
-# # cudnn.deterministic = True # Low Calculation Done... use only at end of research
+## CuDNN
+import torch.backends.cudnn as cudnn
+cudnn.benchmark = False
+# cudnn.deterministic = True # Low Calculation Done... use only at end of research
 
-# ## Python
-# import random
-# random.seed(seed)
+## Python
+import random
+random.seed(seed)
 
 if __name__ == '__main__':
     if torch.cuda.is_available(): 
@@ -52,12 +52,16 @@ if __name__ == '__main__':
     parser.add_argument("--cam_num_epoches", default=5, type=int) # 5
     parser.add_argument("--cam_learning_rate", default=0.1, type=float)
     parser.add_argument("--cam_weight_decay", default=1e-4, type=float)
-    parser.add_argument("--cam_eval_thres", default=0.25, type=float)
+    parser.add_argument("--cam_eval_thres", default=0.15, type=float) # 0.25 for AMN
     parser.add_argument("--cam_scales", default=(1.0, 0.5, 1.5, 2.0),
                         help="Multi-scale inferences")
+    
+    # CRF parameter
+    parser.add_argument("--alpha", default=32, type=float)
+    parser.add_argument("--t", default=10, type=float)
 
     # Mining Inter-pixel Relations
-    parser.add_argument("--conf_fg_thres", default=0.45, type=float) # 0.30 0.45
+    parser.add_argument("--conf_fg_thres", default=0.40, type=float) # 0.30 0.45
     parser.add_argument("--conf_bg_thres", default=0.10, type=float) # 0.05 0.15
 
     # Output Path
@@ -84,25 +88,21 @@ if __name__ == '__main__':
                         help="Hyper-parameter that controls the number of random walk iterations,"
                              "The random walk is performed 2^{exp_times}.")
     parser.add_argument("--ins_seg_bg_thres", default=0.25)
-    parser.add_argument("--sem_seg_bg_thres", default=0.25) # 0.25
+    parser.add_argument("--sem_seg_bg_thres", default=0.25)
 
     # Step
     parser.add_argument("--train_cam_pass", default=True)
     parser.add_argument("--make_cam_pass", default=True)
     parser.add_argument("--draw_cam_pass", default=True)
     parser.add_argument("--eval_cam_pass", default=True)
-    
     parser.add_argument("--make_crf_pass", default=True)
     parser.add_argument("--eval_crf_pass", default=True)
     parser.add_argument("--draw_crf_pass", default=True)
-    
     parser.add_argument("--cam_to_ir_label_pass", default=True)
     parser.add_argument("--train_aff_pass", default=True) 
-    
     parser.add_argument("--make_aff_pass", default=True)
     parser.add_argument("--eval_aff_pass", default=True)
     parser.add_argument("--draw_aff_pass", default=True)
-    
     parser.add_argument("--make_irn_pass", default=True)
     parser.add_argument("--eval_irn_pass", default=True)
     parser.add_argument("--draw_irn_pass", default=True)

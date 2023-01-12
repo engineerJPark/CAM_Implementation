@@ -41,7 +41,7 @@ def _work(process_id, dataset, args):
             keys = np.load(args.cam_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['keys']
             keys = np.pad(keys + 1, (1, 0), mode='constant') # bg 0, class start w 1
 
-            cam_img_crf = _crf_with_alpha(img, cam_img, keys)
+            cam_img_crf = _crf_with_alpha(img, cam_img, keys, alpha=args.alpha, t=args.t)
             cam_img_crf[cam_img_crf < args.cam_eval_thres] = 0
             cam_img_crf = np.argmax(cam_img_crf, axis=0) # 0 bg, homepage class num is fg, HW dimension
             cam_img_crf = keys[cam_img_crf] # 0 bg, homepage class num as fg
