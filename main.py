@@ -1,27 +1,28 @@
 import argparse
 import os
-
+import torch
 from misc import pyutils
 
-## random seed fixing
-## PyTorch
-import torch
-torch.manual_seed(0)
-torch.cuda.manual_seed(0)
-torch.cuda.manual_seed_all(0) # gpu 1개 이상일 때 
+# ## random seed fixing
+# ## PyTorch
+# import torch
+# seed = 42
+# torch.manual_seed(seed)
+# torch.cuda.manual_seed(seed)
+# torch.cuda.manual_seed_all(seed) # gpu 1개 이상일 때 
 
-## Numpy
-import numpy as np
-np.random.seed(0)
+# ## Numpy
+# import numpy as np
+# np.random.seed(seed)
 
-## CuDNN
-import torch.backends.cudnn as cudnn
-cudnn.benchmark = False
-# cudnn.deterministic = True # Low Calculation Done... use only at end of research
+# ## CuDNN
+# import torch.backends.cudnn as cudnn
+# cudnn.benchmark = False
+# # cudnn.deterministic = True # Low Calculation Done... use only at end of research
 
-## Python
-import random
-random.seed(0)
+# ## Python
+# import random
+# random.seed(seed)
 
 if __name__ == '__main__':
     if torch.cuda.is_available(): 
@@ -37,9 +38,9 @@ if __name__ == '__main__':
                         help="Path to VOC 2012 Devkit, must contain ./JPEGImages as subdirectory.")
 
     # Dataset
-    parser.add_argument("--train_list", default="voc12/train.txt", type=str)
-    parser.add_argument("--val_list", default="voc12/val.txt", type=str)
-    parser.add_argument("--infer_list", default="voc12/train.txt", type=str,
+    parser.add_argument("--train_list", default="voc12/train_aug.txt", type=str)
+    parser.add_argument("--val_list", default="voc12/train_aug.txt", type=str)
+    parser.add_argument("--infer_list", default="voc12/train_aug.txt", type=str,
                         help="voc12/train_aug.txt to train a fully supervised model, "
                              "voc12/train.txt or voc12/val.txt to quickly check the quality of the labels.")
     parser.add_argument("--chainer_eval_set", default="train", type=str)
@@ -48,7 +49,7 @@ if __name__ == '__main__':
     parser.add_argument("--cam_network", default="net.resnet50_cam", type=str)
     parser.add_argument("--cam_crop_size", default=512, type=int)
     parser.add_argument("--cam_batch_size", default=16, type=int)
-    parser.add_argument("--cam_num_epoches", default=10, type=int) # 5
+    parser.add_argument("--cam_num_epoches", default=5, type=int) # 5
     parser.add_argument("--cam_learning_rate", default=0.1, type=float)
     parser.add_argument("--cam_weight_decay", default=1e-4, type=float)
     parser.add_argument("--cam_eval_thres", default=0.25, type=float)
@@ -56,8 +57,8 @@ if __name__ == '__main__':
                         help="Multi-scale inferences")
 
     # Mining Inter-pixel Relations
-    parser.add_argument("--conf_fg_thres", default=0.45, type=float) # 0.30
-    parser.add_argument("--conf_bg_thres", default=0.15, type=float) # 0.05
+    parser.add_argument("--conf_fg_thres", default=0.40, type=float) # 0.30 0.45
+    parser.add_argument("--conf_bg_thres", default=0.10, type=float) # 0.05 0.15
 
     # Output Path
     parser.add_argument("--log_name", default="sample_train_eval", type=str)
@@ -72,7 +73,7 @@ if __name__ == '__main__':
     parser.add_argument("--irn_network", default="net.resnet50_aff", type=str)
     parser.add_argument("--irn_crop_size", default=512, type=int)
     parser.add_argument("--irn_batch_size", default=32, type=int)
-    parser.add_argument("--irn_num_epoches", default=10, type=int) # 3
+    parser.add_argument("--irn_num_epoches", default=3, type=int) # 5
     parser.add_argument("--irn_learning_rate", default=0.1, type=float)
     parser.add_argument("--irn_weight_decay", default=1e-4, type=float)
     

@@ -92,10 +92,11 @@ def run(args):
                       'imps:%.1f' % ((step + 1) * args.cam_batch_size / timer.get_stage_elapsed()),
                       'lr: %.4f' % (optimizer.param_groups[0]['lr']),
                       'etc:%s' % (timer.str_estimated_complete()), flush=True)
+        timer.reset_stage()
 
-        else:
-            validate(model, val_data_loader)
-            timer.reset_stage()
+    else:
+        validate(model, val_data_loader)
+            
 
     torch.save(model.module.state_dict(), args.cam_weights_name)
     torch.cuda.empty_cache()
