@@ -57,7 +57,7 @@ if __name__ == '__main__':
                         help="Multi-scale inferences")
 
     # Mining Inter-pixel Relations
-    parser.add_argument("--conf_fg_thres", default=0.40, type=float) # 0.30 0.45
+    parser.add_argument("--conf_fg_thres", default=0.45, type=float) # 0.30 0.45
     parser.add_argument("--conf_bg_thres", default=0.10, type=float) # 0.05 0.15
 
     # Output Path
@@ -65,7 +65,8 @@ if __name__ == '__main__':
     parser.add_argument("--cam_weights_name", default="savefile/pretrained/res50_cam.pth", type=str)
     parser.add_argument("--cam_out_dir", default="savefile/result/cam", type=str) 
     parser.add_argument("--crf_out_dir", default="savefile/result/cam_crf", type=str) 
-    parser.add_argument("--aff_out_dir", default="savefile/result/cam_aff", type=str) 
+    parser.add_argument("--aff_out_dir", default="savefile/result/cam_aff", type=str)
+    parser.add_argument("--irn_out_dir", default="savefile/result/cam_irn", type=str) 
     parser.add_argument("--irn_weights_name", default="savefile/pretrained/res50_irn.pth", type=str) # affinity 
     parser.add_argument("--ir_label_out_dir", default="savefile/result/ir_label", type=str) # affinity 
 
@@ -88,13 +89,23 @@ if __name__ == '__main__':
     # Step
     parser.add_argument("--train_cam_pass", default=True)
     parser.add_argument("--make_cam_pass", default=True)
-    parser.add_argument("--eval_cam_pass", default=True)
     parser.add_argument("--draw_cam_pass", default=True)
-    parser.add_argument("--make_cam_crf_pass", default=True)
-    parser.add_argument("--cam_to_ir_label_pass", default=True)
-    parser.add_argument("--train_cam_aff_pass", default=True) 
-    parser.add_argument("--make_cam_aff_pass", default=True)
+    parser.add_argument("--eval_cam_pass", default=True)
     
+    parser.add_argument("--make_crf_pass", default=True)
+    parser.add_argument("--eval_crf_pass", default=True)
+    parser.add_argument("--draw_crf_pass", default=True)
+    
+    parser.add_argument("--cam_to_ir_label_pass", default=True)
+    parser.add_argument("--train_aff_pass", default=True) 
+    
+    parser.add_argument("--make_aff_pass", default=True)
+    parser.add_argument("--eval_aff_pass", default=True)
+    parser.add_argument("--draw_aff_pass", default=True)
+    
+    parser.add_argument("--make_irn_pass", default=True)
+    parser.add_argument("--eval_irn_pass", default=True)
+    parser.add_argument("--draw_irn_pass", default=True)
 
     args = parser.parse_args()
 
@@ -106,6 +117,7 @@ if __name__ == '__main__':
     pyutils.Logger(args.log_name + '.log')
     print(vars(args))
 
+    ## normal CAM
     if args.train_cam_pass is True:
         import step.train_cam
         timer = pyutils.Timer('step.train_cam:')
@@ -116,26 +128,6 @@ if __name__ == '__main__':
         timer = pyutils.Timer('step.make_cam:')
         step.make_cam.run(args)
         
-    if args.make_cam_crf_pass is True:
-        import step.make_cam_crf
-        timer = pyutils.Timer('step.make_cam_crf:')
-        step.make_cam_crf.run(args)
-        
-    if args.cam_to_ir_label_pass is True:
-        import step.cam_to_ir_label
-        timer = pyutils.Timer('step.cam_to_ir_label:')
-        step.cam_to_ir_label.run(args)
-        
-    if args.train_cam_aff_pass is True:
-        import step.train_cam_aff
-        timer = pyutils.Timer('step.train_cam_aff:')
-        step.train_cam_aff.run(args)
-
-    if args.make_cam_aff_pass is True:
-        import step.make_cam_aff
-        timer = pyutils.Timer('step.make_cam_aff:')
-        step.make_cam_aff.run(args)
-        
     if args.eval_cam_pass is True:
         import step.eval_cam
         timer = pyutils.Timer('step.eval_cam:')
@@ -145,4 +137,62 @@ if __name__ == '__main__':
         import step.draw_cam
         timer = pyutils.Timer('step.draw_cam:')
         step.draw_cam.run(args)
+    
+    ## CRF
+    if args.make_crf_pass is True:
+        import step.make_crf
+        timer = pyutils.Timer('step.make_crf:')
+        step.make_crf.run(args)
         
+    if args.eval_crf_pass is True:
+        import step.eval_cam
+        timer = pyutils.Timer('step.eval_cam:')
+        step.eval_cam.run(args)
+        
+    if args.draw_crf_pass is True:
+        import step.draw_cam
+        timer = pyutils.Timer('step.draw_cam:')
+        step.draw_cam.run(args)
+        
+    ## AffinityNet & IRN model training
+    if args.cam_to_ir_label_pass is True:
+        import step.cam_to_ir_label
+        timer = pyutils.Timer('step.cam_to_ir_label:')
+        step.cam_to_ir_label.run(args)
+        
+    if args.train_aff_pass is True:
+        import step.train_aff
+        timer = pyutils.Timer('step.train_aff:')
+        step.train_aff.run(args)
+
+    ## AffinityNet
+    if args.make_aff_pass is True:
+        import step.make_aff
+        timer = pyutils.Timer('step.make_aff:')
+        step.make_aff.run(args)
+        
+    if args.eval_aff_pass is True:
+        import step.eval_aff
+        timer = pyutils.Timer('step.eval_aff:')
+        step.eval_aff.run(args)
+
+    if args.draw_aff_pass is True:
+        import step.draw_aff
+        timer = pyutils.Timer('step.draw_aff:')
+        step.draw_aff.run(args)
+    
+    ## IRN
+    if args.make_irn_pass is True:
+        import step.make_irn
+        timer = pyutils.Timer('step.make_irn:')
+        step.make_irn.run(args)
+        
+    if args.eval_irn_pass is True:
+        import step.eval_irn
+        timer = pyutils.Timer('step.eval_irn:')
+        step.eval_irn.run(args)
+
+    if args.draw_irn_pass is True:
+        import step.draw_irn
+        timer = pyutils.Timer('step.draw_irn:')
+        step.draw_irn.run(args)

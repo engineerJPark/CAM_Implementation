@@ -30,7 +30,7 @@ def _work(process_id, dataset, args):
     n_gpus = torch.cuda.device_count()
     data_loader = DataLoader(databin, shuffle=False, num_workers=args.num_workers // n_gpus, pin_memory=False)
     
-    os.makedirs(args.cam_out_dir + "_on_img", exist_ok=True)
+    os.makedirs(args.irn_out_dir + "_on_img", exist_ok=True)
 
     with torch.no_grad(), cuda.device(process_id):
         for iter, pack in enumerate(data_loader):
@@ -41,14 +41,19 @@ def _work(process_id, dataset, args):
             
             img = PIL.Image.open(os.path.join(args.voc12_root, 'JPEGImages', name_str + '.jpg'))
             
-            cam_img = np.load(args.cam_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res']
+            # cam_img = np.load(args.cam_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res']
+            ins_out = np.load(os.path.join(args.ins_seg_out_dir, name_str + '.npy'), allow_pickle=True).item()
+            pred_class = ins_out['class']
+            pred_mask = ins_out['mask']
+            pred_score = ins_out['score']
+            
             cam_img_pil = []
-            for channel_idx in range(cam_img.shape[0]): # cam img for each class + coloring
-                cam_img_pil.append(PIL.Image.fromarray(np.uint8(cm.jet(cam_img[channel_idx, ...]) * 255)))
-            for channel_idx in range(cam_img.shape[0]): # superpose on image
+            for channel_idx in range(pred_score.shape[0]): # cam img for each class + coloring
+                cam_img_pil.append(PIL.Image.fromarray(np.uint8(cm.jet(pred_score[channel_idx, ...]) * 255)))
+            for channel_idx in range(pred_score.shape[0]): # superpose on image
                 plt.imshow(img, alpha = 0.5)
                 plt.imshow(cam_img_pil[channel_idx], alpha = 0.4)
-                plt.savefig(args.cam_out_dir + "_on_img" + '/cam_%s_%s.png' % (name_str, CAT_LIST[valid_cat[channel_idx]]))
+                plt.savefig(args.irn_out_dir + "_on_img" + '/cam_%s_%s.png' % (name_str, CAT_LIST[valid_cat[channel_idx]]))
                 plt.clf()
 
             if process_id == n_gpus - 1 and iter % (len(databin) // 20) == 0:

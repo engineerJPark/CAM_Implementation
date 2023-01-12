@@ -30,7 +30,7 @@ def _work(process_id, dataset, args):
     n_gpus = torch.cuda.device_count()
     data_loader = DataLoader(databin, shuffle=False, num_workers=args.num_workers // n_gpus, pin_memory=False)
     
-    os.makedirs(args.cam_out_dir + "_on_img", exist_ok=True)
+    os.makedirs(args.aff_out_dir + "_on_img", exist_ok=True)
 
     with torch.no_grad(), cuda.device(process_id):
         for iter, pack in enumerate(data_loader):
@@ -40,15 +40,21 @@ def _work(process_id, dataset, args):
             valid_cat = torch.nonzero(label)[:, 0] # nonzero label index for all batch. coded class number && [2, 11]
             
             img = PIL.Image.open(os.path.join(args.voc12_root, 'JPEGImages', name_str + '.jpg'))
+
+            # save aff image
+            aff_ = np.load(args.aff_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res'] # HW dim, 0 is bg, class num is already inside the image
+            aff_img = np.zeros((np.unique(aff_).shape[0] - 1, aff_.shape[0], aff_.shape[1])) # 0, class numbers ... 
             
-            cam_img = np.load(args.cam_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res']
-            cam_img_pil = []
-            for channel_idx in range(cam_img.shape[0]): # cam img for each class + coloring
-                cam_img_pil.append(PIL.Image.fromarray(np.uint8(cm.jet(cam_img[channel_idx, ...]) * 255)))
-            for channel_idx in range(cam_img.shape[0]): # superpose on image
+            for idx in range(1, aff_img.shape[0] + 1): 
+                aff_img[idx-1][aff_ == np.unique(aff_)[idx]] = 1 # delete background
+            
+            aff_img_pil = []
+            for channel_idx in range(aff_img.shape[0]): # cam img for each class + coloring
+                aff_img_pil.append(PIL.Image.fromarray(np.uint8(cm.jet(aff_img[channel_idx, ...]) * 255)))
+            for channel_idx in range(aff_img.shape[0]): # superpose on image
                 plt.imshow(img, alpha = 0.5)
-                plt.imshow(cam_img_pil[channel_idx], alpha = 0.4)
-                plt.savefig(args.cam_out_dir + "_on_img" + '/cam_%s_%s.png' % (name_str, CAT_LIST[valid_cat[channel_idx]]))
+                plt.imshow(aff_img_pil[channel_idx], alpha = 0.4)
+                plt.savefig(args.aff_out_dir + "_on_img" + '/cam_%s_%s.png' % (name_str, CAT_LIST[np.unique(aff_)[channel_idx + 1] - 1])) # CAT_LIST[valid_cat[channel_idx]]
                 plt.clf()
 
             if process_id == n_gpus - 1 and iter % (len(databin) // 20) == 0:

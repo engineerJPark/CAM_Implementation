@@ -30,7 +30,7 @@ def _work(process_id, dataset, args):
     n_gpus = torch.cuda.device_count()
     data_loader = DataLoader(databin, shuffle=False, num_workers=args.num_workers // n_gpus, pin_memory=False)
     
-    os.makedirs(args.cam_out_dir + "_on_img", exist_ok=True)
+    os.makedirs(args.crf_out_dir + "_on_img", exist_ok=True)
 
     with torch.no_grad(), cuda.device(process_id):
         for iter, pack in enumerate(data_loader):
@@ -41,19 +41,24 @@ def _work(process_id, dataset, args):
             
             img = PIL.Image.open(os.path.join(args.voc12_root, 'JPEGImages', name_str + '.jpg'))
             
-            cam_img = np.load(args.cam_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res']
-            cam_img_pil = []
-            for channel_idx in range(cam_img.shape[0]): # cam img for each class + coloring
-                cam_img_pil.append(PIL.Image.fromarray(np.uint8(cm.jet(cam_img[channel_idx, ...]) * 255)))
-            for channel_idx in range(cam_img.shape[0]): # superpose on image
-                plt.imshow(img, alpha = 0.5)
-                plt.imshow(cam_img_pil[channel_idx], alpha = 0.4)
-                plt.savefig(args.cam_out_dir + "_on_img" + '/cam_%s_%s.png' % (name_str, CAT_LIST[valid_cat[channel_idx]]))
-                plt.clf()
+            # save crf image
+            crf_ = np.load(args.crf_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res'] # HW dimension, saved a key indices 
+            crf_img = np.zeros((np.unique(crf_).shape[0] - 1, crf_.shape[0], crf_.shape[1])) ### According to the given key value
+            
+            for idx in range(1, crf_img.shape[0] + 1): 
+                crf_img[idx-1][crf_ == np.unique(crf_)[idx]] = 1 # set to binary label image
 
+            crf_img_pil = []
+            for channel_idx in range(crf_img.shape[0]): # cam img for each class + coloring
+                crf_img_pil.append(PIL.Image.fromarray(np.uint8(cm.jet(crf_img[channel_idx, ...]) * 255)))
+            for channel_idx in range(crf_img.shape[0]): # superpose on image
+                plt.imshow(img, alpha = 0.5)
+                plt.imshow(crf_img_pil[channel_idx], alpha = 0.4)
+                plt.savefig(args.crf_out_dir + "_on_img" + '/cam_%s_%s.png' % (name_str, CAT_LIST[np.unique(crf_)[channel_idx + 1] - 1])) # CAT_LIST[valid_cat[channel_idx]]
+                plt.clf()
+                
             if process_id == n_gpus - 1 and iter % (len(databin) // 20) == 0:
                 print("%d " % ((5*iter+1)//(len(databin) // 20)), end='')
-
 
 def run(args):
     n_gpus = torch.cuda.device_count()
