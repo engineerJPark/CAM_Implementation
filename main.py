@@ -145,9 +145,9 @@ if __name__ == '__main__':
         step.make_crf.run(args)
         
     if args.eval_crf_pass is True:
-        import step.eval_cam
-        timer = pyutils.Timer('step.eval_cam:')
-        step.eval_cam.run(args)
+        import step.eval_crf
+        timer = pyutils.Timer('step.eval_crf:')
+        step.eval_crf.run(args)
         
     if args.draw_crf_pass is True:
         import step.draw_crf
