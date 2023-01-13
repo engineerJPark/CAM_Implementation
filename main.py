@@ -52,7 +52,8 @@ if __name__ == '__main__':
     parser.add_argument("--cam_num_epoches", default=5, type=int) # 5
     parser.add_argument("--cam_learning_rate", default=0.1, type=float)
     parser.add_argument("--cam_weight_decay", default=1e-4, type=float)
-    parser.add_argument("--cam_eval_thres", default=0.15, type=float) # 0.25 for AMN
+    parser.add_argument("--cam_eval_thres", default=0.15, type=float)
+    parser.add_argument("--cam_eval_thres4AMN", default=0.25, type=float)
     parser.add_argument("--cam_scales", default=(1.0, 0.5, 1.5, 2.0),
                         help="Multi-scale inferences")
     
@@ -61,8 +62,8 @@ if __name__ == '__main__':
     parser.add_argument("--t", default=10, type=float)
 
     # Mining Inter-pixel Relations
-    parser.add_argument("--conf_fg_thres", default=0.40, type=float) # 0.30 0.45
-    parser.add_argument("--conf_bg_thres", default=0.10, type=float) # 0.05 0.15
+    parser.add_argument("--conf_fg_thres", default=0.45, type=float) # 0.30 0.45
+    parser.add_argument("--conf_bg_thres", default=0.15, type=float) # 0.05 0.15
 
     # Output Path
     parser.add_argument("--log_name", default="sample_train_eval", type=str)

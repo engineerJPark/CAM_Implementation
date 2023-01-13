@@ -17,15 +17,9 @@ cd cam && bash do.sh
 for installing overall depency of this repo, follow this installation : 
 
 ```
-sudo apt update
-sudo apt install build-essential
-pip install chainercv
-pip install matplotlib
-pip install imageio
-
-sudo apt-get remove cython
-pip install -U cython
-pip install git+https://github.com/lucasb-eyer/pydensecrf.git
+sudo apt update && sudo apt install build-essential
+pip install chainercv && pip install matplotlib && pip install imageio && pip install pillow && pip install scikit-image
+sudo apt-get remove cython && pip install -U cython && pip install git+https://github.com/lucasb-eyer/pydensecrf.git
 ```
 
 for spend some lazy times... use tmux.

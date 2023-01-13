@@ -24,11 +24,15 @@ CAT_LIST = ['aeroplane', 'bicycle', 'bird', 'boat',
 
 cudnn.enabled = True
 
-def _work(process_id, dataset, args):
+# def _work(process_id, dataset, args):
 
-    databin = dataset[process_id]
+    # databin = dataset[process_id]
+    # n_gpus = torch.cuda.device_count()
+    # data_loader = DataLoader(databin, shuffle=False, num_workers=args.num_workers // n_gpus, pin_memory=False)
+    
+def _work(dataset, args):
     n_gpus = torch.cuda.device_count()
-    data_loader = DataLoader(databin, shuffle=False, num_workers=args.num_workers // n_gpus, pin_memory=False)
+    data_loader = DataLoader(dataset, shuffle=False, num_workers=args.num_workers // n_gpus, pin_memory=False)
     
     os.makedirs(args.irn_out_dir + "_on_img", exist_ok=True)
 
@@ -42,7 +46,7 @@ def _work(process_id, dataset, args):
             img = PIL.Image.open(os.path.join(args.voc12_root, 'JPEGImages', name_str + '.jpg'))
             
             # cam_img = np.load(args.cam_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res']
-            ins_out = np.load(os.path.join(args.ins_seg_out_dir, name_str + '.npy'), allow_pickle=True).item()
+            ins_out = np.load(os.path.join(args.irn_out_dir, name_str + '.npy'), allow_pickle=True).item()
             pred_class = ins_out['class']
             pred_mask = ins_out['mask']
             pred_score = ins_out['score']
@@ -65,10 +69,11 @@ def run(args):
 
     dataset = voc12.dataloader.VOC12ClassificationDatasetMSF(args.train_list,
                                                              voc12_root=args.voc12_root, scales=args.cam_scales)
-    dataset = torchutils.split_dataset(dataset, n_gpus)
-
-    print('[ ', end='')
-    multiprocessing.spawn(_work, nprocs=n_gpus, args=(dataset, args), join=True)
-    print(']')
+    _work(dataset, args)
+    
+    # dataset = torchutils.split_dataset(dataset, n_gpus)
+    # print('[ ', end='')
+    # multiprocessing.spawn(_work, nprocs=n_gpus, args=(dataset, args), join=True)
+    # print(']')
 
     torch.cuda.empty_cache()

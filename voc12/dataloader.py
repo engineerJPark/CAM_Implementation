@@ -58,6 +58,7 @@ def get_img_path(img_name, voc12_root):
 def load_img_name_list(dataset_path):
 
     img_name_list = np.loadtxt(dataset_path, dtype=np.int32)
+    # img_name_list = np.loadtxt(dataset_path, dtype=str)
 
     return img_name_list
 

@@ -13,7 +13,7 @@ def run(args):
     pred_mask = []
     pred_score = []
     for id in dataset.ids:
-        ins_out = np.load(os.path.join(args.ins_seg_out_dir, id + '.npy'), allow_pickle=True).item()
+        ins_out = np.load(os.path.join(args.irn_out_dir, id + '.npy'), allow_pickle=True).item()
         pred_class.append(ins_out['class'])
         pred_mask.append(ins_out['mask'])
         pred_score.append(ins_out['score'])
