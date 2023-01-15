@@ -126,6 +126,7 @@ def _work(process_id, model, dataset, args):
             cam_dict = np.load(args.cam_out_dir + '/' + img_name + '.npy', allow_pickle=True).item()
 
             cams = cam_dict['cam'].cuda()
+            cams = np.power(cams, 1.3) # test this trick
             keys = cam_dict['keys']
 
             centroids = find_centroids_with_refinement(dp)

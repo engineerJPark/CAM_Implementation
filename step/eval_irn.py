@@ -16,34 +16,17 @@ def run(args):
     pred_mask = []
     for id in dataset.ids:
         ins_out = np.load(os.path.join(args.irn_out_dir, id + '.npy'), allow_pickle=True).item()
-        mask_list4img= []
+        img_per_mask = np.zeros_like(ins_out['mask'][0], dtype=np.int64)
         for i in np.unique(ins_out['class']):
-            mask_list = []
+            ith_mask = np.full_like(ins_out['mask'][0], False)
             for j in range(len(ins_out['class'])):
                 if i == ins_out['class'][j]:
-                    ins_out['mask'][j][ins_out['mask'][j] == 255] = 0
-                    mask_list.append(ins_out['mask'][j])
-            mask_list4img.append(np.stack(mask_list, axis=0).sum(axis=0) * (i + 1)) ## wait ...
-        pred_mask.append(np.stack(mask_list4img, axis=0))
-    
+                    ith_mask += ins_out['mask'][j]
+            img_per_mask += ith_mask * (i+1)
+        pred_mask.append(np.stack(img_per_mask, axis=0))
+
     pred_mask = np.asarray(pred_mask)
     labels = np.asarray(labels)
-    
-    ## need to make as True False to 0,1,14 ...
-
-    # print(np.unique(preds[0]))
-    # print(preds[0].shape) ## (281, 500)
-    # print(preds.ndim) ## 1
-    # print(labels.ndim) ## 1
-    # print(len(preds)) ## 1
-    # print(len(labels)) ## 1
-    # print(pred.shape) ## (1464,)
-    # print(labels.shape) ## (1464,)
-    # print(pred_mask.ndim) ## 1
-    # print(labels.ndim) ## 1
-    
-    # print(pred_mask[0].shape) ## (1464,)
-    # print(labels[0].shape) ## (1464,)
     
     confusion = calc_semantic_segmentation_confusion(pred_mask, labels)[:21, :21]
     

@@ -26,9 +26,9 @@ cudnn.enabled = True
 
 # def _work(process_id, dataset, args):
 
-    # databin = dataset[process_id]
-    # n_gpus = torch.cuda.device_count()
-    # data_loader = DataLoader(databin, shuffle=False, num_workers=args.num_workers // n_gpus, pin_memory=False)
+#     databin = dataset[process_id]
+#     n_gpus = torch.cuda.device_count()
+#     data_loader = DataLoader(databin, shuffle=False, num_workers=args.num_workers // n_gpus, pin_memory=False)
     
 def _work(dataset, args):
     n_gpus = torch.cuda.device_count()
@@ -36,7 +36,8 @@ def _work(dataset, args):
     
     os.makedirs(args.irn_out_dir + "_on_img", exist_ok=True)
 
-    with torch.no_grad(), cuda.device(process_id):
+    # with torch.no_grad(), cuda.device(process_id):
+    with torch.no_grad():
         for iter, pack in enumerate(data_loader):
             # load cam npy
             name_str = pack['name'][0]
@@ -47,9 +48,13 @@ def _work(dataset, args):
             
             # cam_img = np.load(args.cam_out_dir + '/' + name_str + '.npy', allow_pickle=True).item()['high_res']
             ins_out = np.load(os.path.join(args.irn_out_dir, name_str + '.npy'), allow_pickle=True).item()
-            pred_class = ins_out['class']
-            pred_mask = ins_out['mask']
-            pred_score = ins_out['score']
+            pred_score = np.zeros((np.unique(ins_out['class']).shape[0], ins_out['mask'][0].shape[0], ins_out['mask'][0].shape[1]), dtype=np.int64)
+            for idx, i in enumerate(np.unique(ins_out['class'])):
+                ith_mask = np.full_like(ins_out['mask'][0], False)
+                for j in range(len(ins_out['class'])):
+                    if i == ins_out['class'][j]:
+                        ith_mask += ins_out['mask'][j]
+                pred_score[idx] = ith_mask * (i+1)
             
             cam_img_pil = []
             for channel_idx in range(pred_score.shape[0]): # cam img for each class + coloring
@@ -57,11 +62,14 @@ def _work(dataset, args):
             for channel_idx in range(pred_score.shape[0]): # superpose on image
                 plt.imshow(img, alpha = 0.5)
                 plt.imshow(cam_img_pil[channel_idx], alpha = 0.4)
+                # print(valid_cat)
+                # print(channel_idx)
                 plt.savefig(args.irn_out_dir + "_on_img" + '/cam_%s_%s.png' % (name_str, CAT_LIST[valid_cat[channel_idx]]))
                 plt.clf()
 
-            if process_id == n_gpus - 1 and iter % (len(databin) // 20) == 0:
-                print("%d " % ((5*iter+1)//(len(databin) // 20)), end='')
+            # if process_id == n_gpus - 1 and iter % (len(databin) // 20) == 0:
+            if iter % (len(dataset) // 20) == 0:
+                print("%d " % ((5*iter+1)//(len(dataset) // 20)), end='')
 
 
 def run(args):
