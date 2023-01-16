@@ -34,7 +34,7 @@ def _work(process_id, model, dataset, args):
             cam_dict = np.load(args.cam_out_dir + '/' + img_name + '.npy', allow_pickle=True).item()
 
             cams = cam_dict['cam']
-            cams = np.power(cams, 1.3) # test this trick
+            cams = np.power(cams, 1.3) ## test this trick
             
             keys = np.pad(cam_dict['keys'] + 1, (1, 0), mode='constant') # homepage class number
 

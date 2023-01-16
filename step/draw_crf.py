@@ -36,7 +36,8 @@ def _work(dataset, args):
     
     os.makedirs(args.crf_out_dir + "_on_img", exist_ok=True)
 
-    with torch.no_grad(), cuda.device(process_id):
+    # with torch.no_grad(), cuda.device(process_id):
+    with torch.no_grad():
         for iter, pack in enumerate(data_loader):
             # load cam npy
             name_str = pack['name'][0]
@@ -61,8 +62,11 @@ def _work(dataset, args):
                 plt.savefig(args.crf_out_dir + "_on_img" + '/cam_%s_%s.png' % (name_str, CAT_LIST[np.unique(crf_)[channel_idx + 1] - 1])) # CAT_LIST[valid_cat[channel_idx]]
                 plt.clf()
                 
-            if process_id == n_gpus - 1 and iter % (len(databin) // 20) == 0:
-                print("%d " % ((5*iter+1)//(len(databin) // 20)), end='')
+            # if process_id == n_gpus - 1 and iter % (len(databin) // 20) == 0:
+            #     print("%d " % ((5*iter+1)//(len(databin) // 20)), end='')
+
+            if iter % (len(dataset) // 20) == 0:
+                print("%d " % ((5*iter+1)//(len(dataset) // 20)), end='')
 
 def run(args):
     n_gpus = torch.cuda.device_count()

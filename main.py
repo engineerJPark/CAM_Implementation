@@ -48,12 +48,11 @@ if __name__ == '__main__':
     # Class Activation Map
     parser.add_argument("--cam_network", default="net.resnet50_cam", type=str)
     parser.add_argument("--cam_crop_size", default=512, type=int)
-    parser.add_argument("--cam_batch_size", default=4, type=int)
+    parser.add_argument("--cam_batch_size", default=16, type=int) # 16
     parser.add_argument("--cam_num_epoches", default=5, type=int) # 5
     parser.add_argument("--cam_learning_rate", default=0.1, type=float)
     parser.add_argument("--cam_weight_decay", default=1e-4, type=float)
     parser.add_argument("--cam_eval_thres", default=0.15, type=float)
-    parser.add_argument("--cam_eval_thres4AMN", default=0.25, type=float)
     parser.add_argument("--cam_scales", default=(1.0, 0.5, 1.5, 2.0),
                         help="Multi-scale inferences")
     
@@ -62,7 +61,7 @@ if __name__ == '__main__':
     parser.add_argument("--t", default=10, type=float)
 
     # Mining Inter-pixel Relations
-    parser.add_argument("--conf_fg_thres", default=0.45, type=float) # 0.30 0.45
+    parser.add_argument("--conf_fg_thres", default=0.45, type=float) # 0.30 on IRN 0.45 on AMN
     parser.add_argument("--conf_bg_thres", default=0.15, type=float) # 0.05 0.15
 
     # Output Path
@@ -78,7 +77,7 @@ if __name__ == '__main__':
     # Inter-pixel Relation Network (IRNet)
     parser.add_argument("--irn_network", default="net.resnet50_aff", type=str)
     parser.add_argument("--irn_crop_size", default=512, type=int)
-    parser.add_argument("--irn_batch_size", default=4, type=int)
+    parser.add_argument("--irn_batch_size", default=32, type=int) # 32
     parser.add_argument("--irn_num_epoches", default=3, type=int) # 5
     parser.add_argument("--irn_learning_rate", default=0.1, type=float)
     parser.add_argument("--irn_weight_decay", default=1e-4, type=float)
@@ -134,11 +133,6 @@ if __name__ == '__main__':
         timer = pyutils.Timer('step.eval_cam:')
         step.eval_cam.run(args)
 
-    if args.draw_cam_pass is True:
-        import step.draw_cam
-        timer = pyutils.Timer('step.draw_cam:')
-        step.draw_cam.run(args)
-    
     ## CRF
     if args.make_crf_pass is True:
         import step.make_crf
@@ -149,11 +143,6 @@ if __name__ == '__main__':
         import step.eval_crf
         timer = pyutils.Timer('step.eval_crf:')
         step.eval_crf.run(args)
-        
-    if args.draw_crf_pass is True:
-        import step.draw_crf
-        timer = pyutils.Timer('step.draw_cam:')
-        step.draw_crf.run(args)
         
     ## AffinityNet & IRN model training
     if args.cam_to_ir_label_pass is True:
@@ -177,23 +166,34 @@ if __name__ == '__main__':
         timer = pyutils.Timer('step.eval_aff:')
         step.eval_aff.run(args)
 
-    if args.draw_aff_pass is True:
-        import step.draw_aff
-        timer = pyutils.Timer('step.draw_aff:')
-        step.draw_aff.run(args)
-    
-    ## IRN
-    if args.make_irn_pass is True:
-        import step.make_irn
-        timer = pyutils.Timer('step.make_irn:')
-        step.make_irn.run(args)
+    # ## IRN
+    # if args.make_irn_pass is True:
+    #     import step.make_irn
+    #     timer = pyutils.Timer('step.make_irn:')
+    #     step.make_irn.run(args)
         
-    if args.eval_irn_pass is True:
-        import step.eval_irn
-        timer = pyutils.Timer('step.eval_irn:')
-        step.eval_irn.run(args)
-
-    if args.draw_irn_pass is True:
-        import step.draw_irn
-        timer = pyutils.Timer('step.draw_irn:')
-        step.draw_irn.run(args)
+    # if args.eval_irn_pass is True:
+    #     import step.eval_irn
+    #     timer = pyutils.Timer('step.eval_irn:')
+    #     step.eval_irn.run(args)
+    
+    ## drawing
+    # if args.draw_cam_pass is True:
+    #     import step.draw_cam
+    #     timer = pyutils.Timer('step.draw_cam:')
+    #     step.draw_cam.run(args)
+        
+    # if args.draw_crf_pass is True:
+    #     import step.draw_crf
+    #     timer = pyutils.Timer('step.draw_cam:')
+    #     step.draw_crf.run(args)
+        
+    # if args.draw_aff_pass is True:
+    #     import step.draw_aff
+    #     timer = pyutils.Timer('step.draw_aff:')
+    #     step.draw_aff.run(args)
+        
+    # if args.draw_irn_pass is True:
+    #     import step.draw_irn
+    #     timer = pyutils.Timer('step.draw_irn:')
+    #     step.draw_irn.run(args)

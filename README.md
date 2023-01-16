@@ -28,6 +28,9 @@ for spend some lazy times... use tmux.
 sudo apt-get install tmux
 ```
 
+IRN & AffinityNet training is recommended to be done in **single** GPU. For regarding this [Issue](https://github.com/jiwoon-ahn/irn/issues/13#issuecomment-529797603), `MeanShift layer` is dependent on batch size per GPU(similar as batchnorm in process), so the training environment is recommended to be set same as the [original repository](https://github.com/jiwoon-ahn/irn).
+
+
 
 # Acknowledgements
 
