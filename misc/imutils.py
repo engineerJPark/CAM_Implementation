@@ -167,7 +167,7 @@ def crf_inference_label(img, labels, t=10, n_labels=21, gt_prob=0.7):
 
     d.setUnaryEnergy(unary)
     d.addPairwiseGaussian(sxy=3, compat=3)
-    d.addPairwiseBilateral(sxy=50, srgb=5, rgbim=np.ascontiguousarray(np.copy(img)), compat=10)
+    d.addPairwiseBilateral(sxy=50, srgb=13, rgbim=np.ascontiguousarray(np.copy(img)), compat=10) # (sxy=50, srgb=5, rgbim=np.ascontiguousarray(np.copy(img)), compat=10)
     
     q = d.inference(t)
 
@@ -206,17 +206,6 @@ def _crf_with_alpha(image, cam_list, keys, alpha=32, t=10):
     crf_score = crf_inference_softmax(image, bgcam_score, n_labels=bgcam_score.shape[0], t=t) # input HWC, output CHW
     
     return crf_score
-    
-    # n_crf_al = dict()
-    # n_crf_al[0] = crf_score[0] # idx 0 is bg
-    # for i, key in enumerate(keys):
-    #     n_crf_al[key+1] = crf_score[i+1] # save as homepage class num
-    
-    # n_crf_al = np.zeros((keys.shape[0], cam_list.shape[-2], cam_list.shape[-1]))
-    # for i, key in enumerate(keys): # keys ex 0, 1, 14, ... 
-    #     n_crf_al[i] = crf_score[key]
-    
-    # return n_crf_al
 
 
 def get_strided_size(orig_size, stride):
@@ -238,84 +227,3 @@ def compress_range(arr):
     out = d[arr]
     return out - np.min(out)
 
-
-# def colorize_score(score_map, exclude_zero=False, normalize=True, by_hue=False):
-#     import matplotlib.colors
-#     if by_hue:
-#         aranged = np.arange(score_map.shape[0]) / (score_map.shape[0])
-#         hsv_color = np.stack((aranged, np.ones_like(aranged), np.ones_like(aranged)), axis=-1)
-#         rgb_color = matplotlib.colors.hsv_to_rgb(hsv_color)
-
-#         test = rgb_color[np.argmax(score_map, axis=0)]
-#         test = np.expand_dims(np.max(score_map, axis=0), axis=-1) * test
-
-#         if normalize:
-#             return test / (np.max(test) + 1e-5)
-#         else:
-#             return test
-
-#     else:
-#         VOC_color = np.array([(0, 0, 0), (128, 0, 0), (0, 128, 0), (128, 128, 0), (0, 0, 128), (128, 0, 128),
-#                      (0, 128, 128), (128, 128, 128), (64, 0, 0), (192, 0, 0), (64, 128, 0), (192, 128, 0),
-#                      (64, 0, 128), (192, 0, 128), (64, 128, 128), (192, 128, 128), (0, 64, 0), (128, 64, 0),
-#                      (0, 192, 0), (128, 192, 0), (0, 64, 128), (255, 255, 255)], np.float32)
-
-#         if exclude_zero:
-#             VOC_color = VOC_color[1:]
-
-#         test = VOC_color[np.argmax(score_map, axis=0)%22]
-#         test = np.expand_dims(np.max(score_map, axis=0), axis=-1) * test
-#         if normalize:
-#             test /= np.max(test) + 1e-5
-
-#         return test
-
-
-# def colorize_displacement(disp):
-
-#     import matplotlib.colors
-#     import math
-
-#     a = (np.arctan2(-disp[0], -disp[1]) / math.pi + 1) / 2
-
-#     r = np.sqrt(disp[0] ** 2 + disp[1] ** 2)
-#     s = r / np.max(r)
-#     hsv_color = np.stack((a, s, np.ones_like(a)), axis=-1)
-#     rgb_color = matplotlib.colors.hsv_to_rgb(hsv_color)
-
-#     return rgb_color
-
-
-# def colorize_label(label_map, normalize=True, by_hue=True, exclude_zero=False, outline=False):
-
-#     label_map = label_map.astype(np.uint8)
-
-#     if by_hue:
-#         import matplotlib.colors
-#         sz = np.max(label_map)
-#         aranged = np.arange(sz) / sz
-#         hsv_color = np.stack((aranged, np.ones_like(aranged), np.ones_like(aranged)), axis=-1)
-#         rgb_color = matplotlib.colors.hsv_to_rgb(hsv_color)
-#         rgb_color = np.concatenate([np.zeros((1, 3)), rgb_color], axis=0)
-
-#         test = rgb_color[label_map]
-#     else:
-#         VOC_color = np.array([(0, 0, 0), (128, 0, 0), (0, 128, 0), (128, 128, 0), (0, 0, 128), (128, 0, 128),
-#                               (0, 128, 128), (128, 128, 128), (64, 0, 0), (192, 0, 0), (64, 128, 0), (192, 128, 0),
-#                               (64, 0, 128), (192, 0, 128), (64, 128, 128), (192, 128, 128), (0, 64, 0), (128, 64, 0),
-#                               (0, 192, 0), (128, 192, 0), (0, 64, 128), (255, 255, 255)], np.float32)
-
-#         if exclude_zero:
-#             VOC_color = VOC_color[1:]
-#         test = VOC_color[label_map]
-#         if normalize:
-#             test /= np.max(test)
-
-#     if outline:
-#         edge = np.greater(np.sum(np.abs(test[:-1, :-1] - test[1:, :-1]), axis=-1) + np.sum(np.abs(test[:-1, :-1] - test[:-1, 1:]), axis=-1), 0)
-#         edge1 = np.pad(edge, ((0, 1), (0, 1)), mode='constant', constant_values=0)
-#         edge2 = np.pad(edge, ((1, 0), (1, 0)), mode='constant', constant_values=0)
-#         edge = np.repeat(np.expand_dims(np.maximum(edge1, edge2), -1), 3, axis=-1)
-
-#         test = np.maximum(test, edge)
-#     return test
