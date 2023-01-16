@@ -13,8 +13,8 @@ python main.py \
 --ins_seg_bg_thres=0.25 \
 --sem_seg_bg_thres=0.25 \
 
-# --eval_crf_pass=False \
 # --eval_cam_pass=False \
+# --eval_crf_pass=False \
 # --cam_to_ir_label_pass=False \
 # --train_aff_pass=False \
 # --make_aff_pass=False \
