@@ -33,8 +33,7 @@ def _work(process_id, model, dataset, args):
 
             cam_dict = np.load(args.cam_out_dir + '/' + img_name + '.npy', allow_pickle=True).item()
 
-            cams = cam_dict['cam']
-            cams = np.power(cams, 1.3) ## test this trick
+            cams = cam_dict['cam'] # cams = np.power(cams, 1.3) ## test this trick
             
             keys = np.pad(cam_dict['keys'] + 1, (1, 0), mode='constant') # homepage class number
 
@@ -51,7 +50,6 @@ def _work(process_id, model, dataset, args):
             rw_pred = keys[rw_pred] # HW dim, 0 bg, homepage class num is fg
 
             np.save(os.path.join(args.aff_out_dir, img_name + '.npy'), {"keys": keys[1:], "high_res": rw_pred})
-            # imageio.imsave(os.path.join(args.aff_out_dir, img_name + '.png'), rw_pred.astype(np.uint8))
 
             if process_id == n_gpus - 1 and iter % (len(databin) // 20) == 0:
                 print("%d " % ((5*iter+1)//(len(databin) // 20)), end='')

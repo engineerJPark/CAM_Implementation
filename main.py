@@ -61,8 +61,8 @@ if __name__ == '__main__':
     parser.add_argument("--t", default=10, type=float)
 
     # Mining Inter-pixel Relations
-    parser.add_argument("--conf_fg_thres", default=0.45, type=float) # 0.30 on IRN 0.45 on AMN
-    parser.add_argument("--conf_bg_thres", default=0.15, type=float) # 0.05 0.15
+    parser.add_argument("--conf_fg_thres", default=0.30, type=float) # 0.30 on IRN 0.45 on AMN
+    parser.add_argument("--conf_bg_thres", default=0.05, type=float) # 0.05 0.15
 
     # Output Path
     parser.add_argument("--log_name", default="sample_train_eval", type=str)
@@ -78,8 +78,8 @@ if __name__ == '__main__':
     parser.add_argument("--irn_network", default="net.resnet50_aff", type=str)
     parser.add_argument("--irn_crop_size", default=512, type=int)
     parser.add_argument("--irn_batch_size", default=32, type=int) # 32
-    parser.add_argument("--irn_num_epoches", default=3, type=int) # 5
-    parser.add_argument("--irn_learning_rate", default=0.1, type=float)
+    parser.add_argument("--irn_num_epoches", default=5, type=int) # 5
+    parser.add_argument("--irn_learning_rate", default=0.1, type=float) # 0.1
     parser.add_argument("--irn_weight_decay", default=1e-4, type=float)
     
     # Random Walk Params
@@ -103,9 +103,6 @@ if __name__ == '__main__':
     parser.add_argument("--make_aff_pass", default=True)
     parser.add_argument("--eval_aff_pass", default=True)
     parser.add_argument("--draw_aff_pass", default=True)
-    parser.add_argument("--make_irn_pass", default=True)
-    parser.add_argument("--eval_irn_pass", default=True)
-    parser.add_argument("--draw_irn_pass", default=True)
 
     args = parser.parse_args()
 
@@ -113,6 +110,7 @@ if __name__ == '__main__':
     os.makedirs("savefile/result", exist_ok=True)
     os.makedirs("savefile/pretrained", exist_ok=True)
     os.makedirs(args.cam_out_dir, exist_ok=True)
+    os.makedirs(args.irn_out_dir, exist_ok=True)
 
     pyutils.Logger(args.log_name + '.log')
     print(vars(args))
@@ -144,7 +142,7 @@ if __name__ == '__main__':
         timer = pyutils.Timer('step.eval_crf:')
         step.eval_crf.run(args)
         
-    ## AffinityNet & IRN model training
+    ## AffinityNet model training
     if args.cam_to_ir_label_pass is True:
         import step.cam_to_ir_label
         timer = pyutils.Timer('step.cam_to_ir_label:')
@@ -165,17 +163,6 @@ if __name__ == '__main__':
         import step.eval_aff
         timer = pyutils.Timer('step.eval_aff:')
         step.eval_aff.run(args)
-
-    # ## IRN
-    # if args.make_irn_pass is True:
-    #     import step.make_irn
-    #     timer = pyutils.Timer('step.make_irn:')
-    #     step.make_irn.run(args)
-        
-    # if args.eval_irn_pass is True:
-    #     import step.eval_irn
-    #     timer = pyutils.Timer('step.eval_irn:')
-    #     step.eval_irn.run(args)
     
     ## drawing
     # if args.draw_cam_pass is True:
@@ -192,8 +179,3 @@ if __name__ == '__main__':
     #     import step.draw_aff
     #     timer = pyutils.Timer('step.draw_aff:')
     #     step.draw_aff.run(args)
-        
-    # if args.draw_irn_pass is True:
-    #     import step.draw_irn
-    #     timer = pyutils.Timer('step.draw_irn:')
-    #     step.draw_irn.run(args)
